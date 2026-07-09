@@ -1,0 +1,18 @@
+{
+  "topic_slug": "tencent-ali-renewal",
+  "raw_text": "这里放用户确认后的文本",
+  "topic_mark": "",
+  "files": [
+    {
+      "filename": "optional-note.jpg",
+      "mime_type": "image/jpeg",
+      "size_bytes": 123456,
+      "note": "可选附件元数据，不传也可以"
+    }
+  ],
+  "_available_topic_slugs": [
+    "tencent-ali-renewal",
+    "lining-pitch",
+    "baijiu-wly-lzlj"
+  ]
+}

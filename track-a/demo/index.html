@@ -1,0 +1,1324 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>主见 · Keel</title>
+  <style>
+    :root {
+      --bg: #0f1114;
+      --surface: #181b20;
+      --surface-2: #1f2329;
+      --border: rgba(255,255,255,.07);
+      --text: #e8eaed;
+      --text-muted: #8b929a;
+      --accent: #c4a574;
+      --accent-dim: rgba(196,165,116,.15);
+      --danger: #c96a5a;
+      --success: #6a9e7a;
+      --radius: 14px;
+      --phone-w: 390px;
+      --safe-bottom: env(safe-area-inset-bottom, 0px);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Helvetica Neue", sans-serif;
+      background: linear-gradient(165deg, #0a0c0f 0%, #141820 50%, #0f1114 100%);
+      color: var(--text);
+      min-height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 24px 16px calc(24px + var(--safe-bottom));
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .stage-label {
+      font-size: 11px;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+      opacity: .7;
+    }
+
+    .phone {
+      width: 100%;
+      max-width: var(--phone-w);
+      background: var(--bg);
+      border-radius: 36px;
+      border: 1px solid var(--border);
+      box-shadow: 0 24px 80px rgba(0,0,0,.55), inset 0 1px 0 rgba(255,255,255,.04);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 720px;
+      max-height: 860px;
+      height: calc(100dvh - 120px);
+    }
+
+    .status-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 24px 4px;
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    .notch {
+      width: 120px;
+      height: 28px;
+      background: #000;
+      border-radius: 0 0 18px 18px;
+      margin: 0 auto -8px;
+      position: relative;
+      z-index: 2;
+    }
+
+    header.app-header {
+      padding: 8px 20px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+    }
+
+    .brand {
+      font-size: 22px;
+      font-weight: 600;
+      letter-spacing: .02em;
+    }
+
+    .brand-en {
+      font-size: 13px;
+      color: var(--accent);
+      font-weight: 500;
+      margin-left: 6px;
+    }
+
+    .mode-badge {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      background: var(--surface-2);
+      color: var(--text-muted);
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .mode-badge.live { color: var(--success); border-color: rgba(106,158,122,.3); background: rgba(106,158,122,.08); }
+    .mode-badge.mock { color: var(--accent); border-color: rgba(196,165,116,.25); background: var(--accent-dim); }
+
+    .topic-select {
+      margin-top: 12px;
+      width: 100%;
+      appearance: none;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 10px 36px 10px 14px;
+      border-radius: 10px;
+      font-size: 14px;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%238b929a' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 14px center;
+    }
+
+    .notify-preview {
+      margin: 12px 16px 0;
+      padding: 12px 14px;
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      display: flex;
+      gap: 10px;
+      align-items: flex-start;
+    }
+
+    .notify-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #2a2e35, #1a1d22);
+      border: 1px solid var(--border);
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      color: var(--accent);
+    }
+
+    .notify-body { flex: 1; min-width: 0; }
+
+    .notify-app {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 2px;
+    }
+
+    .notify-text {
+      font-size: 13px;
+      line-height: 1.4;
+      color: var(--text);
+    }
+
+    .notify-hint {
+      font-size: 10px;
+      color: var(--text-muted);
+      margin-top: 6px;
+      opacity: .8;
+    }
+
+    .force-bar {
+      margin: 12px 16px 0;
+      padding: 10px 14px;
+      background: var(--surface);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      transition: border-color .25s, background .25s;
+    }
+
+    .force-label {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .force-level-name {
+      font-weight: 500;
+      transition: color .2s;
+    }
+
+    .force-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 6px;
+      border-radius: 3px;
+      background: linear-gradient(90deg, var(--force-track-start, #6a9e7a) 0%, var(--force-track-mid, #c4a574) 50%, var(--force-track-end, #c96a5a) 100%);
+      outline: none;
+      cursor: pointer;
+    }
+
+    .force-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--force-thumb, var(--accent));
+      border: 2px solid rgba(255,255,255,.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      cursor: grab;
+    }
+
+    .force-slider::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: var(--force-thumb, var(--accent));
+      border: 2px solid rgba(255,255,255,.15);
+      box-shadow: 0 2px 8px rgba(0,0,0,.35);
+      cursor: grab;
+    }
+
+    .force-scale {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 6px;
+      font-size: 10px;
+      color: var(--text-muted);
+      opacity: .75;
+    }
+
+    .force-scale span:last-child { color: var(--danger); opacity: .85; }
+    .force-scale span:first-child { color: var(--success); opacity: .85; }
+
+    .main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      min-height: 0;
+    }
+
+    .tab-panel {
+      display: none;
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px;
+      -webkit-overflow-scrolling: touch;
+    }
+
+    .tab-panel.active { display: flex; flex-direction: column; }
+
+    /* 说 */
+    .speak-area {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .transcript-box {
+      flex: 1;
+      min-height: 100px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px;
+      font-size: 15px;
+      line-height: 1.55;
+      color: var(--text);
+      resize: none;
+      font-family: inherit;
+    }
+
+    .transcript-box::placeholder { color: var(--text-muted); }
+
+    .hold-btn-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 0;
+    }
+
+    .hold-btn {
+      width: 88px;
+      height: 88px;
+      border-radius: 50%;
+      border: 2px solid rgba(196,165,116,.35);
+      background: radial-gradient(circle at 30% 30%, rgba(196,165,116,.2), rgba(196,165,116,.05));
+      color: var(--accent);
+      font-size: 15px;
+      font-weight: 500;
+      cursor: pointer;
+      user-select: none;
+      transition: transform .15s, box-shadow .15s;
+      box-shadow: 0 4px 24px rgba(196,165,116,.12);
+    }
+
+    .hold-btn:active, .hold-btn.recording {
+      transform: scale(.96);
+      box-shadow: 0 2px 12px rgba(196,165,116,.25);
+      background: radial-gradient(circle at 30% 30%, rgba(196,165,116,.35), rgba(196,165,116,.1));
+    }
+
+    .hold-hint { font-size: 12px; color: var(--text-muted); }
+
+    .submit-row {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn {
+      flex: 1;
+      padding: 12px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 14px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .btn-primary {
+      background: var(--accent-dim);
+      border-color: rgba(196,165,116,.35);
+      color: var(--accent);
+      font-weight: 500;
+    }
+
+    .btn:disabled { opacity: .45; cursor: not-allowed; }
+
+    .reply-card {
+      margin-top: 4px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--accent);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+
+    .reply-meta {
+      font-size: 11px;
+      color: var(--text-muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .reply-tag {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: rgba(201,106,90,.12);
+      color: var(--danger);
+      border: 1px solid rgba(201,106,90,.25);
+    }
+
+    .reply-body {
+      font-size: 14px;
+      line-height: 1.65;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .reply-body p { margin-bottom: 10px; }
+    .reply-body p:last-child { margin-bottom: 0; }
+
+    /* 立场 */
+    .position-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px;
+      line-height: 1.7;
+      font-size: 15px;
+    }
+
+    .position-card.empty {
+      color: var(--text-muted);
+      font-style: normal;
+      text-align: center;
+      padding: 48px 24px;
+    }
+
+    .position-updated {
+      margin-top: 12px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .contradiction-banner {
+      margin-bottom: 12px;
+      padding: 10px 12px;
+      background: rgba(201,106,90,.08);
+      border: 1px solid rgba(201,106,90,.2);
+      border-radius: 10px;
+      font-size: 13px;
+      color: #d4a098;
+    }
+
+    /* 日志 */
+    .search-box {
+      width: 100%;
+      padding: 10px 14px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 14px;
+      font-family: inherit;
+    }
+
+    .snapshot-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .snapshot-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s;
+    }
+
+    .snapshot-item:hover { border-color: rgba(196,165,116,.25); }
+    .snapshot-item.expanded { border-color: rgba(196,165,116,.35); }
+
+    .snapshot-date {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      margin-bottom: 6px;
+    }
+
+    .snapshot-snippet {
+      font-size: 13px;
+      line-height: 1.55;
+      color: var(--text-muted);
+    }
+
+    .snapshot-full {
+      display: none;
+      margin-top: 10px;
+      padding-top: 10px;
+      border-top: 1px solid var(--border);
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      white-space: pre-wrap;
+    }
+
+    .snapshot-item.expanded .snapshot-full { display: block; }
+    .snapshot-item.expanded .snapshot-snippet { display: none; }
+
+    .empty-log {
+      text-align: center;
+      color: var(--text-muted);
+      padding: 48px 20px;
+      font-size: 14px;
+    }
+
+    /* 历史 */
+    .history-list { list-style: none; display: flex; flex-direction: column; gap: 10px; }
+
+    .history-item {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color .15s;
+    }
+
+    .history-item:hover { border-color: rgba(196,165,116,.2); }
+    .history-item.expanded { border-color: rgba(196,165,116,.35); }
+
+    .history-head {
+      padding: 12px 14px;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .history-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    .history-topic {
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      background: var(--surface-2);
+      border: 1px solid var(--border);
+      color: var(--accent);
+      white-space: nowrap;
+    }
+
+    .history-preview {
+      font-size: 13px;
+      line-height: 1.45;
+      color: var(--text);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    .history-detail {
+      display: none;
+      padding: 0 14px 14px;
+      border-top: 1px solid var(--border);
+    }
+
+    .history-item.expanded .history-detail { display: block; }
+
+    .history-block {
+      margin-top: 12px;
+    }
+
+    .history-block-label {
+      font-size: 10px;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+      text-transform: uppercase;
+    }
+
+    .history-block-body {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text);
+      white-space: pre-wrap;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 10px 12px;
+    }
+
+    .history-block-body.reply {
+      border-left: 3px solid var(--accent);
+    }
+
+    .history-intensity {
+      font-size: 10px;
+      color: var(--text-muted);
+    }
+
+    .tab-bar {
+      display: flex;
+      border-top: 1px solid var(--border);
+      background: var(--surface);
+      padding-bottom: var(--safe-bottom);
+    }
+
+    .tab-btn {
+      flex: 1;
+      padding: 10px 4px 12px;
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 11px;
+      cursor: pointer;
+      font-family: inherit;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .tab-btn .tab-icon { font-size: 20px; line-height: 1; opacity: .7; }
+    .tab-btn.active { color: var(--accent); }
+    .tab-btn.active .tab-icon { opacity: 1; }
+
+    footer.demo-footer {
+      margin-top: 16px;
+      font-size: 11px;
+      color: var(--text-muted);
+      opacity: .65;
+      letter-spacing: .04em;
+    }
+
+    .settings-btn {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 18px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
+    }
+
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,.65);
+      z-index: 100;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .modal-overlay.open { display: flex; }
+
+    .modal {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    .modal h3 { font-size: 16px; margin-bottom: 12px; }
+
+    .modal label {
+      display: block;
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-bottom: 6px;
+    }
+
+    .modal input {
+      width: 100%;
+      padding: 10px 12px;
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: 14px;
+      margin-bottom: 14px;
+      font-family: inherit;
+    }
+
+    .modal-actions { display: flex; gap: 10px; }
+
+    .loading {
+      display: inline-block;
+      width: 14px;
+      height: 14px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+      vertical-align: middle;
+      margin-right: 6px;
+    }
+
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    @media (max-width: 420px) {
+      body { padding: 12px 8px; }
+      .phone { border-radius: 28px; min-height: 640px; height: calc(100dvh - 80px); }
+      .stage-label { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <p class="stage-label">产品体验预览 · 本地演示</p>
+
+  <div class="phone" role="application" aria-label="主见 Keel 演示">
+    <div class="notch" aria-hidden="true"></div>
+    <div class="status-bar">
+      <span id="clock">21:30</span>
+      <span id="connStatus">检测中…</span>
+    </div>
+
+    <header class="app-header">
+      <div class="brand-row">
+        <div>
+          <span class="brand">主见</span><span class="brand-en">Keel</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="mode-badge mock" id="modeBadge">演示</span>
+          <button class="settings-btn" id="settingsBtn" title="Live 模式设置" aria-label="设置">⚙</button>
+        </div>
+      </div>
+      <select class="topic-select" id="topicSelect" aria-label="切换话题"></select>
+    </header>
+
+    <div class="notify-preview" aria-label="锁屏通知预览">
+      <div class="notify-icon" aria-hidden="true">主</div>
+      <div class="notify-body">
+        <div class="notify-app">主见 · 刚刚</div>
+        <div class="notify-text" id="notifyText">今天的整理已就绪</div>
+        <div class="notify-hint">锁屏 / 通知栏不显示话题、人物或异议内容</div>
+      </div>
+    </div>
+
+    <div class="force-bar" id="forceBar" aria-label="力谏强度">
+      <div class="force-label">
+        <span>力谏强度</span>
+        <span class="force-level-name" id="forceLevelName">常态 · 3</span>
+      </div>
+      <input type="range" class="force-slider" id="forceSlider" min="1" max="5" step="1" value="3"
+        aria-valuemin="1" aria-valuemax="5" aria-valuenow="3" aria-label="力谏强度滑块">
+      <div class="force-scale">
+        <span>平和</span>
+        <span>呛人</span>
+      </div>
+    </div>
+
+    <main class="main">
+      <!-- 说 -->
+      <section class="tab-panel active" id="panel-speak" aria-label="说">
+        <div class="speak-area">
+          <textarea class="transcript-box" id="transcript" rows="4"
+            placeholder="语音转写后在此确认，或直接输入…"></textarea>
+          <div class="hold-btn-wrap">
+            <button type="button" class="hold-btn" id="holdBtn">按住说</button>
+            <span class="hold-hint" id="holdHint">模拟快捷指令 · 松开后填入示例转写</span>
+          </div>
+          <div class="submit-row">
+            <button type="button" class="btn" id="clearBtn">清空</button>
+            <button type="button" class="btn btn-primary" id="submitBtn">确认并请教军师</button>
+          </div>
+          <div class="reply-card" id="replyCard">
+            <div class="reply-meta">
+              <span>军师 · 示例回复</span>
+              <span class="reply-tag">反对意见配额</span>
+            </div>
+            <div class="reply-body" id="replyBody"></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 立场 -->
+      <section class="tab-panel" id="panel-position" aria-label="立场">
+        <div id="contradictionBanner" class="contradiction-banner" style="display:none"></div>
+        <div class="position-card" id="positionCard"></div>
+        <p class="position-updated" id="positionUpdated"></p>
+      </section>
+
+      <!-- 历史 -->
+      <section class="tab-panel" id="panel-history" aria-label="历史">
+        <ul class="history-list" id="historyList"></ul>
+      </section>
+
+      <!-- 日志 -->
+      <section class="tab-panel" id="panel-log" aria-label="日志">
+        <input type="search" class="search-box" id="logSearch" placeholder="搜索快照关键字…">
+        <ul class="snapshot-list" id="snapshotList"></ul>
+      </section>
+    </main>
+
+    <nav class="tab-bar" role="tablist">
+      <button type="button" class="tab-btn active" data-tab="speak" role="tab" aria-selected="true">
+        <span class="tab-icon">🎙</span>说
+      </button>
+      <button type="button" class="tab-btn" data-tab="position" role="tab" aria-selected="false">
+        <span class="tab-icon">📌</span>立场
+      </button>
+      <button type="button" class="tab-btn" data-tab="history" role="tab" aria-selected="false">
+        <span class="tab-icon">🕐</span>历史
+      </button>
+      <button type="button" class="tab-btn" data-tab="log" role="tab" aria-selected="false">
+        <span class="tab-icon">📋</span>日志
+      </button>
+    </nav>
+  </div>
+
+  <footer class="demo-footer">过渡版 · 7/15 交付</footer>
+
+  <div class="modal-overlay" id="settingsModal" role="dialog" aria-labelledby="settingsTitle">
+    <div class="modal">
+      <h3 id="settingsTitle">Live 模式</h3>
+      <label for="apiBase">API 地址</label>
+      <input type="url" id="apiBase" value="http://127.0.0.1:8787">
+      <label for="apiKey">KEEL_API_KEY（与 server/.env 一致）</label>
+      <input type="password" id="apiKey" placeholder="留空则使用内置演示数据">
+      <div class="modal-actions">
+        <button type="button" class="btn" id="closeSettings">取消</button>
+        <button type="button" class="btn btn-primary" id="saveSettings">保存并重连</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+(function () {
+  'use strict';
+
+  var FORCE_LEVELS = [
+    { level: 1, name: '平和', short: '平和 · 1', color: '#6a9e7a' },
+    { level: 2, name: '轻扶', short: '轻扶 · 2', color: '#7a9e8a' },
+    { level: 3, name: '常态', short: '常态 · 3', color: '#c4a574' },
+    { level: 4, name: '直谏', short: '直谏 · 4', color: '#d48460' },
+    { level: 5, name: '呛人', short: '呛人 · 5', color: '#c96a5a' }
+  ];
+
+  var SAMPLE_REPLY_TENCENT = '你选择谨慎观察、暂不表态——大方向没错。但我得直说一个风险：在双方都已释放接触信号的语境里，「观望」不是中立，沉默会被读成可拉拢。\n\n如果你错了，最可能错在这：把「信息不足」拖成了「筹码不足」。等声明落地再表态，议价窗口可能已经关了一半。\n\n三点值得你本周内盯死：\n① 双方公开合作声明的时间差（谁先释信号，谁在下通牒）；\n② 独家版权比例是否松动（这是价码，不是细节）；\n③ 监管对平台版权集中度的后续动作。\n\n常规打法：维持中性，等下一轮披露。但有个更激进的想法——主动约一方私下摸底，用「若续约顺利可探讨互补领域合作」换独家比例区间，把观望变成有结构的试探。\n\n这是我的担心，怎么定你说了算。';
+
+  var MOCK_HISTORY = [
+    {
+      id: 'h-ta-1',
+      topic_slug: 'tencent-ali-renewal',
+      topic_name: '腾讯阿里版权续约',
+      timestamp: '2026-07-04T09:15:00Z',
+      raw_text: '腾讯阿里版权续约：我倾向谨慎观察，暂不对外表态，等双方声明和独家比例信号明朗再说。',
+      reply: SAMPLE_REPLY_TENCENT,
+      advice_intensity: 4
+    },
+    {
+      id: 'h-ta-2',
+      topic_slug: 'tencent-ali-renewal',
+      topic_name: '腾讯阿里版权续约',
+      timestamp: '2026-07-03T14:20:00Z',
+      raw_text: '阿里侧音乐版权池续约传闻还没证实，我先维持观望，不急着站队。',
+      reply: '观望在信息真空期是合理默认，但「不站队」不等于「无动作」。\n\n若错，最可能错在：把未证实当成无风险——渠道侧可能已在调整排他条款。\n\n48 小时可验证：向下游合作方确认是否收到独家比例调整通知。\n\n常规打法：维持中性口径。激进备选：主动约一方私下摸底，用结构化试探换信息。',
+      advice_intensity: 3
+    },
+    {
+      id: 'h-lining-1',
+      topic_slug: 'lining-pitch',
+      topic_name: '李宁提案',
+      timestamp: '2026-07-03T11:00:00Z',
+      raw_text: '李宁这边：对方想要加码 NBA 权益，我在犹豫要不要跟，怕陷入竞价陷阱。',
+      reply: '你在犹豫要不要跟价——这说明你已经嗅到竞价陷阱的味道，这个直觉值得保留。\n\n反对意见：若错，最可能错在「低估品牌窗口」——NBA 中国区热度有周期，过度保守可能让竞品独占叙事。\n\n建议拆成两笔决策：① 是否续约；② 报什么价。在没看到 ROI 模型前，任何「加码」都应该是结构化的，不是情绪化的。',
+      advice_intensity: 3
+    },
+    {
+      id: 'h-baijiu-1',
+      topic_slug: 'baijiu-wly-lzlj',
+      topic_name: '白酒（五粮液 & 泸州老窖）',
+      timestamp: '2026-07-02T16:45:00Z',
+      raw_text: '白酒：五粮液批价有点松动，泸州老窖动销还行，我在想要不要调整配比。',
+      reply: '你想调整配比——先别被「动销还行」这一个指标带跑。\n\n若错，最可能错在：把短期渠道补货当成了需求复苏。批价松动若伴随社会库存上升，动销好可能是堰塞湖泄洪。\n\n48 小时可验证：分区域要「开瓶扫码 vs 出货」比值。\n\n常规打法：配比不动，等交叉验证。',
+      advice_intensity: 2
+    }
+  ];
+
+  var TOPICS = {
+    'tencent-ali-renewal': {
+      slug: 'tencent-ali-renewal',
+      name: '腾讯阿里版权续约',
+      forceLevel: 4,
+      livingPosition: '**腾讯阿里版权续约立场**：当前倾向谨慎观察，不急于表态。核心关注：双方合作声明的协同性、独家版权比例的调整信号、以及监管政策对互联网平台版权交易的潜在影响。在以上关键信息明朗前，维持中立姿态，避免因过早表态而陷入被动。同时，保留随时根据新证据调整判断的灵活性。',
+      positionUpdated: '更新于 2026-07-04 · 1 条记录',
+      contradiction: false,
+      sampleTranscript: '腾讯阿里版权续约：我倾向谨慎观察，暂不对外表态，等双方声明和独家比例信号明朗再说。',
+      sampleReply: SAMPLE_REPLY_TENCENT,
+      snapshots: [
+        { date: '2026-07-04', snippet: '今日确认：对腾讯阿里版权续约采取谨慎观察策略，暂不表态。', full: '今日确认：对腾讯阿里版权续约采取谨慎观察策略，暂不表态。后续需重点追踪双方在游戏、音乐、影视等垂直领域的版权合作动态，以及监管层对数字版权市场的指导性意见。' },
+        { date: '2026-07-03', snippet: '追踪：阿里侧音乐版权池续约传闻未证实，维持观望。', full: '追踪：阿里侧音乐版权池续约传闻未证实，维持观望。提醒：若本周无官方声明，需主动向下游合作方确认是否收到排他性调整通知。' },
+        { date: '2026-07-02', snippet: '话题开启：版权续约进入窗口期，尚未形成明确立场。', full: '话题开启：版权续约进入窗口期，尚未形成明确立场。待首次语音输入后生长活文档。' }
+      ]
+    },
+    'lining-pitch': {
+      slug: 'lining-pitch',
+      name: '李宁提案',
+      forceLevel: 3,
+      livingPosition: '**李宁 NBA 续约提案立场**：倾向「价值换曝光，不追 headline 数字」。核心关注：赞助条款中的独家品类边界、中国区 activation 预算是否可控、以及竞品（安踏/特步）同期赛事资源的挤压效应。在未看到对方 ROI 测算与退出条款前，不建议对外承诺超预期金额。',
+      positionUpdated: '更新于 2026-07-03 · 待首次正式输入',
+      contradiction: false,
+      sampleTranscript: '李宁这边：对方想要加码 NBA 权益，我在犹豫要不要跟，怕陷入竞价陷阱。',
+      sampleReply: '你在犹豫要不要跟价——这说明你已经嗅到竞价陷阱的味道，这个直觉值得保留。\n\n反对意见：若错，最可能错在「低估品牌窗口」——NBA 中国区热度有周期，过度保守可能让竞品独占叙事。\n\n建议拆成两笔决策：① 是否续约（取决于退出条款与品类独家边界）；② 报什么价（取决于可量化的 activation ROI，不是感觉）。在没看到对方 ROI 模型前，任何「加码」都应该是结构化的，不是情绪化的。\n\n常规打法：锚定上一周期条款，只换 activation 不抬 base。激进备选：用「联名限量 + 球员中国行」换降 base——把预算从买 logo 改成买可审计转化。',
+      snapshots: [
+        { date: '2026-07-03', snippet: '初判：不追 headline 赞助数字，先看 ROI 与退出条款。', full: '初判：不追 headline 赞助数字，先看 ROI 与退出条款。待对方提供 activation 预算明细与品类独家地图。' },
+        { date: '2026-07-02', snippet: '话题开启：李宁 NBA 续约提案评估。', full: '话题开启：李宁 NBA 续约提案评估。活文档待生长。' }
+      ]
+    },
+    'baijiu-wly-lzlj': {
+      slug: 'baijiu-wly-lzlj',
+      name: '白酒（五粮液 & 泸州老窖）',
+      forceLevel: 3,
+      livingPosition: '**白酒持仓立场**：五粮液与泸州老窖并行观察，暂不单边加仓。核心关注：批价倒挂是否扩散、渠道库存周转天数、以及高端酒商务场景恢复的结构性分化。在渠道数据未交叉验证前，维持均衡配置，避免押注单一叙事。',
+      positionUpdated: '更新于 2026-07-03 · 待首次正式输入',
+      contradiction: false,
+      sampleTranscript: '白酒：五粮液批价有点松动，泸州老窖动销还行，我在想要不要调整配比。',
+      sampleReply: '你想调整配比——先别被「动销还行」这一个指标带跑。\n\n若错，最可能错在：把短期渠道补货当成了需求复苏。批价松动若伴随社会库存上升，动销好可能是堰塞湖泄洪，不是终端真实开瓶。\n\n48 小时可验证：让团队分区域要「开瓶扫码 vs 出货」比值，再看五粮液与老窖是否同向。\n\n常规打法：配比不动，等交叉验证。激进备选：若确认倒挂仅集中在少数大区，可以用「减五粮液、增老窖」做战术调整，但要有明确回滚触发线（例如批价连续两周低于 X）。',
+      snapshots: [
+        { date: '2026-07-03', snippet: '观察：批价与库存信号未一致，维持双酒均衡配置。', full: '观察：批价与库存信号未一致，维持双酒均衡配置。下一步：索取分区域开瓶数据与渠道库存周转。' },
+        { date: '2026-07-02', snippet: '话题开启：五粮液 & 泸州老窖并行跟踪。', full: '话题开启：五粮液 & 泸州老窖并行跟踪。活文档待生长。' }
+      ]
+    }
+  };
+
+  var state = {
+    topic: 'tencent-ali-renewal',
+    live: false,
+    apiBase: localStorage.getItem('keel_api_base') || 'http://127.0.0.1:8787',
+    apiKey: localStorage.getItem('keel_api_key') || '',
+    submitting: false,
+    forceLevel: 3,
+    history: MOCK_HISTORY.slice()
+  };
+
+  var $ = function (id) { return document.getElementById(id); };
+
+  function formatReplyHtml(text) {
+    return text.split('\n\n').map(function (p) {
+      return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
+    }).join('');
+  }
+
+  function setForceLevel(level) {
+    level = Math.max(1, Math.min(5, level | 0));
+    state.forceLevel = level;
+    var info = FORCE_LEVELS[level - 1] || FORCE_LEVELS[2];
+    $('forceLevelName').textContent = info.short;
+    $('forceLevelName').style.color = info.color;
+    $('forceSlider').value = String(level);
+    $('forceSlider').setAttribute('aria-valuenow', String(level));
+    $('forceBar').style.borderColor = info.color + '55';
+    $('forceBar').style.setProperty('--force-thumb', info.color);
+  }
+
+  function formatTimestamp(ts) {
+    if (!ts) return '未知时间';
+    var d = new Date(ts);
+    if (isNaN(d.getTime())) return ts.slice(0, 16).replace('T', ' ');
+    var pad = function (n) { return n.toString().padStart(2, '0'); };
+    return d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) +
+      ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+  }
+
+  function escapeHtml(text) {
+    return String(text)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;');
+  }
+
+  function renderHistory() {
+    var list = $('historyList');
+    var items = state.history.filter(function (h) {
+      return h.topic_slug === state.topic;
+    });
+    list.innerHTML = '';
+    if (!items.length) {
+      list.innerHTML = '<li class="empty-log">暂无历史讨论</li>';
+      return;
+    }
+    items.forEach(function (h) {
+      var li = document.createElement('li');
+      li.className = 'history-item';
+      var intensityLabel = h.advice_intensity
+        ? (FORCE_LEVELS[h.advice_intensity - 1] || {}).short || ('强度 ' + h.advice_intensity)
+        : '';
+      li.innerHTML =
+        '<div class="history-head">' +
+          '<div class="history-meta">' +
+            '<span>' + formatTimestamp(h.timestamp) + '</span>' +
+            '<span class="history-topic">' + escapeHtml(h.topic_name || h.topic_slug) + '</span>' +
+          '</div>' +
+          '<div class="history-preview">' + escapeHtml(h.raw_text) + '</div>' +
+          (intensityLabel ? '<span class="history-intensity">力谏 ' + escapeHtml(intensityLabel) + '</span>' : '') +
+        '</div>' +
+        '<div class="history-detail">' +
+          '<div class="history-block">' +
+            '<div class="history-block-label">原始输入</div>' +
+            '<div class="history-block-body">' + escapeHtml(h.raw_text) + '</div>' +
+          '</div>' +
+          '<div class="history-block">' +
+            '<div class="history-block-label">军师回复</div>' +
+            '<div class="history-block-body reply">' + escapeHtml(h.reply) + '</div>' +
+          '</div>' +
+        '</div>';
+      li.querySelector('.history-head').addEventListener('click', function () {
+        li.classList.toggle('expanded');
+      });
+      list.appendChild(li);
+    });
+  }
+
+  async function fetchTopicLive(slug) {
+    if (!state.live || !state.apiKey) return false;
+    try {
+      var res = await fetch(state.apiBase.replace(/\/$/, '') + '/v1/topic/' + slug, {
+        method: 'GET',
+        headers: { 'X-API-Key': state.apiKey },
+        signal: AbortSignal.timeout(8000)
+      });
+      if (!res.ok) return false;
+      var data = await res.json();
+      var t = TOPICS[slug];
+      if (!t) return false;
+      if (data.living_position) {
+        t.livingPosition = data.living_position;
+        t.positionUpdated = '更新于 Live · ' + (data.entries_count || 0) + ' 条记录';
+      }
+      if (data.snapshots && data.snapshots.length) {
+        t.snapshots = data.snapshots.map(function (s) {
+          var preview = s.preview || s.snippet || '';
+          return {
+            date: s.date || '',
+            snippet: preview.slice(0, 80) + (preview.length > 80 ? '…' : ''),
+            full: preview
+          };
+        });
+      }
+      if (data.entries && data.entries.length) {
+        var liveHistory = data.entries.map(function (e, i) {
+          return {
+            id: 'live-' + slug + '-' + i,
+            topic_slug: slug,
+            topic_name: data.display_name || t.name,
+            timestamp: e.timestamp,
+            raw_text: e.raw_text,
+            reply: e.reply,
+            advice_intensity: e.advice_intensity || 3
+          };
+        });
+        state.history = state.history.filter(function (h) {
+          return h.topic_slug !== slug;
+        }).concat(liveHistory);
+      }
+      return true;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  function renderTopicSelect() {
+    var sel = $('topicSelect');
+    sel.innerHTML = '';
+    Object.keys(TOPICS).forEach(function (slug) {
+      var opt = document.createElement('option');
+      opt.value = slug;
+      opt.textContent = TOPICS[slug].name;
+      sel.appendChild(opt);
+    });
+    sel.value = state.topic;
+  }
+
+  function renderPosition() {
+    var t = TOPICS[state.topic];
+    var card = $('positionCard');
+    var text = t.livingPosition;
+    if (!text || text.indexOf('待主人') >= 0) {
+      card.className = 'position-card empty';
+      card.textContent = '待首次输入后生长';
+    } else {
+      card.className = 'position-card';
+      card.innerHTML = text.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+    }
+    $('positionUpdated').textContent = t.positionUpdated || '';
+    var banner = $('contradictionBanner');
+    if (t.contradiction) {
+      banner.style.display = 'block';
+      banner.textContent = '⚠ 检测到与当前立场存在张力 · 军师已标记待澄清';
+    } else {
+      banner.style.display = 'none';
+    }
+  }
+
+  function renderSnapshots(filter) {
+    var t = TOPICS[state.topic];
+    var list = $('snapshotList');
+    var q = (filter || '').trim().toLowerCase();
+    var items = t.snapshots.filter(function (s) {
+      if (!q) return true;
+      return (s.date + s.snippet + s.full).toLowerCase().indexOf(q) >= 0;
+    });
+    list.innerHTML = '';
+    if (!items.length) {
+      list.innerHTML = '<li class="empty-log">无匹配快照</li>';
+      return;
+    }
+    items.forEach(function (s) {
+      var li = document.createElement('li');
+      li.className = 'snapshot-item';
+      li.innerHTML = '<div class="snapshot-date">' + s.date + '</div>' +
+        '<div class="snapshot-snippet">' + s.snippet + '</div>' +
+        '<div class="snapshot-full">' + s.full + '</div>';
+      li.addEventListener('click', function () { li.classList.toggle('expanded'); });
+      list.appendChild(li);
+    });
+  }
+
+  function renderReply(text, isLive) {
+    $('replyBody').innerHTML = formatReplyHtml(text);
+    var meta = $('replyCard').querySelector('.reply-meta span:first-child');
+    meta.textContent = isLive ? '军师 · 刚刚' : '军师 · 示例回复';
+  }
+
+  function loadTopicUI() {
+    var t = TOPICS[state.topic];
+    setForceLevel(t.forceLevel || 3);
+    renderPosition();
+    renderSnapshots($('logSearch').value);
+    renderHistory();
+    renderReply(t.sampleReply, false);
+    $('transcript').placeholder = '语音转写后在此确认，或直接输入…';
+    fetchTopicLive(state.topic).then(function (ok) {
+      if (ok) {
+        renderPosition();
+        renderSnapshots($('logSearch').value);
+        renderHistory();
+      }
+    });
+  }
+
+  function switchTab(name) {
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    document.querySelectorAll('.tab-btn').forEach(function (b) {
+      var on = b.dataset.tab === name;
+      b.classList.toggle('active', on);
+      b.setAttribute('aria-selected', on ? 'true' : 'false');
+    });
+    $('panel-' + name).classList.add('active');
+  }
+
+  async function checkLive() {
+    var badge = $('modeBadge');
+    var conn = $('connStatus');
+    try {
+      var res = await fetch(state.apiBase.replace(/\/$/, '') + '/health', { method: 'GET', signal: AbortSignal.timeout(2500) });
+      if (!res.ok) throw new Error('health not ok');
+      var data = await res.json();
+      state.live = true;
+      badge.textContent = 'Live';
+      badge.className = 'mode-badge live';
+      conn.textContent = '已连接 API';
+      if (!state.apiKey) {
+        conn.textContent = 'API 在线 · 请设置 Key';
+      }
+      return true;
+    } catch (e) {
+      state.live = false;
+      badge.textContent = '演示';
+      badge.className = 'mode-badge mock';
+      conn.textContent = '离线 · 内置数据';
+      return false;
+    }
+  }
+
+  async function submitEntry() {
+    var text = $('transcript').value.trim();
+    if (!text) {
+      $('transcript').focus();
+      return;
+    }
+    if (state.submitting) return;
+    state.submitting = true;
+    var btn = $('submitBtn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="loading"></span>请教中…';
+
+    var t = TOPICS[state.topic];
+    var usedLive = false;
+
+    if (state.live && state.apiKey) {
+      try {
+        var res = await fetch(state.apiBase.replace(/\/$/, '') + '/v1/entry', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'X-API-Key': state.apiKey
+          },
+          body: JSON.stringify({
+            topic_slug: state.topic,
+            raw_text: text,
+            advice_intensity: state.forceLevel
+          }),
+          signal: AbortSignal.timeout(60000)
+        });
+        if (!res.ok) {
+          var errBody = await res.text();
+          throw new Error(errBody || ('HTTP ' + res.status));
+        }
+        var data = await res.json();
+        renderReply(data.reply, true);
+        if (data.living_position_summary) {
+          t.livingPosition = data.living_position_summary;
+          t.positionUpdated = '更新于 ' + (data.timestamp || '刚刚').slice(0, 10);
+          t.contradiction = !!data.contradiction_detected;
+          renderPosition();
+        }
+        if (data.daily_snapshot_snippet) {
+          t.snapshots.unshift({
+            date: (data.timestamp || new Date().toISOString()).slice(0, 10),
+            snippet: data.daily_snapshot_snippet.slice(0, 80) + (data.daily_snapshot_snippet.length > 80 ? '…' : ''),
+            full: data.daily_snapshot_snippet
+          });
+          renderSnapshots($('logSearch').value);
+        }
+        state.history.unshift({
+          id: 'live-' + state.topic + '-' + Date.now(),
+          topic_slug: state.topic,
+          topic_name: t.name,
+          timestamp: data.timestamp || new Date().toISOString(),
+          raw_text: text,
+          reply: data.reply,
+          advice_intensity: state.forceLevel
+        });
+        renderHistory();
+        $('notifyText').textContent = '你有一条新的记录';
+        usedLive = true;
+      } catch (err) {
+        renderReply(t.sampleReply + '\n\n—\n（Live 请求失败：' + (err.message || '网络错误') + '，以上为演示回复）', false);
+      }
+    }
+
+    if (!usedLive) {
+      await new Promise(function (r) { setTimeout(r, 600); });
+      renderReply(t.sampleReply, false);
+      state.history.unshift({
+        id: 'mock-' + Date.now(),
+        topic_slug: state.topic,
+        topic_name: t.name,
+        timestamp: new Date().toISOString(),
+        raw_text: text,
+        reply: t.sampleReply,
+        advice_intensity: state.forceLevel
+      });
+      renderHistory();
+      $('notifyText').textContent = '今天的整理已就绪';
+    }
+
+    switchTab('speak');
+    btn.disabled = false;
+    btn.textContent = '确认并请教军师';
+    state.submitting = false;
+  }
+
+  function updateClock() {
+    var now = new Date();
+    $('clock').textContent = now.getHours().toString().padStart(2, '0') + ':' + now.getMinutes().toString().padStart(2, '0');
+  }
+
+  /* Events */
+  document.querySelectorAll('.tab-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
+  });
+
+  $('topicSelect').addEventListener('change', function () {
+    state.topic = this.value;
+    loadTopicUI();
+  });
+
+  $('forceSlider').addEventListener('input', function () {
+    setForceLevel(parseInt(this.value, 10));
+  });
+
+  $('logSearch').addEventListener('input', function () {
+    renderSnapshots(this.value);
+  });
+
+  var holdTimer;
+  $('holdBtn').addEventListener('mousedown', startHold);
+  $('holdBtn').addEventListener('touchstart', function (e) { e.preventDefault(); startHold(); });
+  $('holdBtn').addEventListener('mouseup', endHold);
+  $('holdBtn').addEventListener('mouseleave', endHold);
+  $('holdBtn').addEventListener('touchend', endHold);
+
+  function startHold() {
+    $('holdBtn').classList.add('recording');
+    $('holdHint').textContent = '聆听中…';
+    holdTimer = setTimeout(function () {
+      var t = TOPICS[state.topic];
+      $('transcript').value = t.sampleTranscript;
+      $('holdHint').textContent = '已填入示例转写 · 可编辑后提交';
+    }, 500);
+  }
+
+  function endHold() {
+    clearTimeout(holdTimer);
+    $('holdBtn').classList.remove('recording');
+    if ($('holdHint').textContent === '聆听中…') {
+      $('holdHint').textContent = '模拟快捷指令 · 松开后填入示例转写';
+    }
+  }
+
+  $('clearBtn').addEventListener('click', function () {
+    $('transcript').value = '';
+  });
+
+  $('submitBtn').addEventListener('click', submitEntry);
+
+  $('settingsBtn').addEventListener('click', function () {
+    $('apiBase').value = state.apiBase;
+    $('apiKey').value = state.apiKey;
+    $('settingsModal').classList.add('open');
+  });
+
+  $('closeSettings').addEventListener('click', function () {
+    $('settingsModal').classList.remove('open');
+  });
+
+  $('saveSettings').addEventListener('click', async function () {
+    state.apiBase = $('apiBase').value.trim() || 'http://127.0.0.1:8787';
+    state.apiKey = $('apiKey').value.trim();
+    localStorage.setItem('keel_api_base', state.apiBase);
+    localStorage.setItem('keel_api_key', state.apiKey);
+    $('settingsModal').classList.remove('open');
+    await checkLive();
+  });
+
+  $('settingsModal').addEventListener('click', function (e) {
+    if (e.target === $('settingsModal')) $('settingsModal').classList.remove('open');
+  });
+
+  /* Init */
+  renderTopicSelect();
+  loadTopicUI();
+  updateClock();
+  setInterval(updateClock, 30000);
+  checkLive();
+})();
+  </script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+name: Decision gate
+description: 需要 Moses 拍板的事项
+title: "[decision-gate]: "
+labels:
+  - decision-gate
+body:
+  - type: textarea
+    id: decision
+    attributes:
+      label: 需要拍板什么
+    validations:
+      required: true
+  - type: textarea
+    id: options
+    attributes:
+      label: 选项与推荐
+    validations:
+      required: true
+  - type: textarea
+    id: deadline
+    attributes:
+      label: 截止日期 / 阻塞项

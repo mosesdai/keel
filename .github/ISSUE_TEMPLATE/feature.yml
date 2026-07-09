@@ -1,0 +1,35 @@
+name: Feature
+description: New capability for Keel / 军师
+title: "[feature]: "
+labels: []
+body:
+  - type: dropdown
+    id: stage
+    attributes:
+      label: 目标阶段
+      options:
+        - S0 云上底座
+        - S1 Bridge Track (7/15)
+        - S2 原生 Alpha
+        - S3 TestFlight
+        - S4 稳定化
+    validations:
+      required: true
+  - type: textarea
+    id: value
+    attributes:
+      label: 用户价值（九叔 / Moses / agent）
+    validations:
+      required: true
+  - type: textarea
+    id: dod
+    attributes:
+      label: DoD（引用 ACCEPTANCE.md）
+    validations:
+      required: true
+  - type: checkboxes
+    id: gate
+    attributes:
+      label: 是否触发 Moses 决策门禁
+      options:
+        - label: decision-gate（需要 Moses review）

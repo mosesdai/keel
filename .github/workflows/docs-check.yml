@@ -1,0 +1,24 @@
+name: Docs check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+    paths:
+      - '**.md'
+      - '.github/workflows/docs-check.yml'
+
+jobs:
+  docs:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Required docs exist
+        run: |
+          set -e
+          for f in PLAYBOOK.md ACCEPTANCE.md CLOUD_DEV.md ROADMAP.md GITHUB_SETUP.md SESSION_LOG.md RESUME.md; do
+            test -f "$f" || { echo "Missing: $f"; exit 1; }
+          done
+          echo "All required docs present."

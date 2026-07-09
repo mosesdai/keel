@@ -1,0 +1,46 @@
+# Environment & secrets
+.env
+.env.*
+!.env.example
+*.pem
+*.p12
+*.mobileprovision
+*.cer
+credentials.json
+secrets/
+
+# Python
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.pycache/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+*.egg-info/
+dist/
+build/
+
+# macOS / IDE
+.DS_Store
+.idea/
+.vscode/
+*.swp
+*~
+
+# iOS / Xcode (future)
+DerivedData/
+*.xcuserstate
+xcuserdata/
+*.ipa
+*.dSYM.zip
+
+# Track A live user data (do not commit 九叔正文)
+track-a/data/topics/**/entries.jsonl
+track-a/data/topics/**/living_position.md
+track-a/data/topics/**/snapshots/*
+!track-a/data/topics/**/snapshots/.gitkeep
+
+# Logs
+*.log

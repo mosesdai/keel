@@ -1,0 +1,36 @@
+name: Deploy server (Railway)
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - 'track-a/**'
+      - '.github/workflows/deploy-server.yml'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy placeholder
+        env:
+          RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
+        run: |
+          if [ -z "${RAILWAY_TOKEN}" ]; then
+            echo "::notice::RAILWAY_TOKEN not set — skip deploy. Connect Railway GitHub integration or add secret."
+            exit 0
+          fi
+          echo "::notice::RAILWAY_TOKEN is set. Wire railway CLI deploy in a follow-up PR (see GITHUB_SETUP.md Step 4)."
+
+      - name: Post-deploy health (optional)
+        env:
+          KEEL_STAGING_URL: ${{ vars.KEEL_STAGING_URL }}
+        run: |
+          if [ -z "${KEEL_STAGING_URL}" ]; then
+            echo "::notice::KEEL_STAGING_URL repo variable not set — skip /health check."
+            exit 0
+          fi
+          curl -fsS "${KEEL_STAGING_URL%/}/health" || echo "::warning::health check failed"

@@ -1,0 +1,21 @@
+name: Release check
+description: 发给九叔或外测前的 release 清单
+title: "[release]: "
+labels:
+  - release
+body:
+  - type: textarea
+    id: scope
+    attributes:
+      label: 发布范围
+    validations:
+      required: true
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: 检查项
+      options:
+        - label: git status 无 .env / 证书 / profile
+        - label: DeepSeek key 已轮换（若上线）
+        - label: ACCEPTANCE.md 对应段落已更新
+        - label: Moses go/no-go

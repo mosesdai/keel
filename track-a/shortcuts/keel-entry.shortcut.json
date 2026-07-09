@@ -1,0 +1,128 @@
+{
+  "name": "主见",
+  "version": "track-a-20260704",
+  "description": "可手工复刻的快捷指令蓝图（Apple 私有导出格式受限，因此提供动作级可导入清单）",
+  "variables": {
+    "KEEL_API_URL": "{{KEEL_API_URL}}",
+    "KEEL_API_KEY": "{{KEEL_API_KEY}}"
+  },
+  "actions": [
+    {
+      "id": "dictation",
+      "type": "DictateText",
+      "options": {
+        "language": "zh-CN",
+        "prompt": "说给主见"
+      },
+      "output": "raw_text"
+    },
+    {
+      "id": "editable_preview",
+      "type": "ShowResult",
+      "input": "raw_text",
+      "options": {
+        "allowEditing": true
+      },
+      "output": "confirmed_text"
+    },
+    {
+      "id": "topic_menu",
+      "type": "ChooseFromMenu",
+      "items": [
+        {
+          "title": "腾讯阿里版权续约",
+          "value": "tencent-ali-renewal"
+        },
+        {
+          "title": "李宁提案",
+          "value": "lining-pitch"
+        },
+        {
+          "title": "白酒（五粮液/泸州老窖）",
+          "value": "baijiu-wly-lzlj"
+        },
+        {
+          "title": "手动输入",
+          "action": "AskForInput"
+        }
+      ],
+      "output": "topic_slug"
+    },
+    {
+      "id": "request_body",
+      "type": "Dictionary",
+      "items": {
+        "topic_slug": "${topic_slug}",
+        "raw_text": "${confirmed_text}",
+        "topic_mark": ""
+      },
+      "output": "payload"
+    },
+    {
+      "id": "post_entry",
+      "type": "GetContentsOfURL",
+      "options": {
+        "url": "{{KEEL_API_URL}}",
+        "method": "POST",
+        "requestBodyType": "JSON",
+        "headers": {
+          "Content-Type": "application/json",
+          "X-API-Key": "{{KEEL_API_KEY}}"
+        }
+      },
+      "input": "payload",
+      "output": "api_response"
+    },
+    {
+      "id": "extract_reply",
+      "type": "GetDictionaryValue",
+      "key": "reply",
+      "input": "api_response",
+      "output": "reply"
+    },
+    {
+      "id": "extract_living",
+      "type": "GetDictionaryValue",
+      "key": "living_position_summary",
+      "input": "api_response",
+      "output": "living_position_summary"
+    },
+    {
+      "id": "extract_snapshot",
+      "type": "GetDictionaryValue",
+      "key": "daily_snapshot_snippet",
+      "input": "api_response",
+      "output": "daily_snapshot_snippet"
+    },
+    {
+      "id": "show_result",
+      "type": "ShowResult",
+      "inputTemplate": "军师回复：\n${reply}\n\n立场摘要：\n${living_position_summary}\n\n今日快照：\n${daily_snapshot_snippet}"
+    },
+    {
+      "id": "format_date",
+      "type": "FormatDate",
+      "options": {
+        "pattern": "yyyyMMdd"
+      },
+      "output": "date_yyyyMMdd"
+    },
+    {
+      "id": "build_markdown",
+      "type": "Text",
+      "inputTemplate": "## ${CurrentDate}\n原话：${confirmed_text}\n\n军师：\n${reply}\n\n立场摘要：\n${living_position_summary}\n",
+      "output": "daily_markdown"
+    },
+    {
+      "id": "save_to_icloud",
+      "type": "SaveFile",
+      "options": {
+        "service": "iCloudDrive",
+        "path": "Keel/topics/${topic_slug}/${date_yyyyMMdd}.md",
+        "ifFileExists": "append"
+      },
+      "input": "daily_markdown"
+    }
+  ],
+  "manual_import_note": "打开 shortcuts/SETUP.md，按 actions 顺序在 iPhone 快捷指令中逐项添加即可。"
+}
