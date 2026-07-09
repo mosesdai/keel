@@ -4,11 +4,12 @@
 
 | 字段 | 值 |
 |------|-----|
-| **Staging URL** | `https://keel-production-be1c.up.railway.app`（Port 8080，Railway 反代） |
+| **Staging URL** | `https://keel-production-be1c.up.railway.app`（`/health`：[链接](https://keel-production-be1c.up.railway.app/health)） |
 | **Railway 项目** | keel-production（Moses 部署） |
 | **Root Directory** | `track-a` |
-| **最后 `/health` 检查** | **2026-07-10 07:01 JST** — **ok** HTTP 200，`status":"ok"`；`api_key_configured":false`（服务端未读到 `KEEL_API_KEY`） |
-| **最后 `/v1/entry` 检查** | **2026-07-10 07:01 JST** — **fail** HTTP 503，`服务端未配置 KEEL_API_KEY`（Railway Variables 需补 `KEEL_API_KEY` 并 Redeploy） |
-| **KEEL_STAGING_URL（GitHub Variable）** | **待填** → 应填 `https://keel-production-be1c.up.railway.app`（**无尾斜杠**，非 `/v1/entry`） |
-| **备注** | Railway GitHub 集成完成后，`main` push 触发自动部署；九叔快捷指令 POST URL 见 `track-a/shortcuts/KEEL_URL.txt` |
+| **最后 `/health` 检查** | **2026-07-10 07:03 JST** — **ok** HTTP 200，`"status":"ok"`；**`"api_key_configured":false`**（Railway 未注入 `KEEL_API_KEY`） |
+| **最后 `/v1/entry` 检查** | **2026-07-10 07:03 JST** — **fail** HTTP 503（无 `KEEL_API_KEY` 时连无头 POST 也 503；补 key + Redeploy 后期望 401/200） |
+| **KEEL_STAGING_URL（GitHub Variable）** | **待填** → `https://keel-production-be1c.up.railway.app`（**无尾斜杠**） |
+| **备注** | 补 Variables 步骤：[`track-a/server/RAILWAY_VARIABLES_傻瓜版.md`](../server/RAILWAY_VARIABLES_傻瓜版.md)；九叔 POST URL：`track-a/shortcuts/KEEL_URL.txt` |
 
+**Moses 下一步**：Railway Variables 添加 `KEEL_API_KEY`、`DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL_DEFAULT` → **Redeploy** → `/health` 应出现 `api_key_configured: true`。
