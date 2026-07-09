@@ -18,7 +18,7 @@ jobs:
       - name: Required docs exist
         run: |
           set -e
-          for f in PLAYBOOK.md ACCEPTANCE.md CLOUD_DEV.md ROADMAP.md GITHUB_SETUP.md SESSION_LOG.md RESUME.md; do
+          for f in PLAYBOOK.md ACCEPTANCE.md CLOUD_DEV.md ROADMAP.md GITHUB_SETUP.md SESSION_LOG.md RESUME.md AUTONOMOUS_DEV.md MOSES_STATUS.md; do
             test -f "$f" || { echo "Missing: $f"; exit 1; }
           done
           echo "All required docs present."

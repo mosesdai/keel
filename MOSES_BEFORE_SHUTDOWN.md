@@ -141,4 +141,4 @@
 
 ---
 
-*最后更新：2026-07-09 · Secrets ✅，Railway 待做*
+*最后更新：2026-07-10 · Secrets ✅，Railway 待做 · 见 `MOSES_STATUS.md`*

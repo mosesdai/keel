@@ -1,0 +1,71 @@
+name: Agent backlog (weekly)
+
+on:
+  schedule:
+    # 每周一 09:00 UTC ≈ 17:00 北京（夏令时可能差 1h）
+    - cron: '0 9 * * 1'
+  workflow_dispatch:
+
+permissions:
+  issues: write
+
+jobs:
+  weekly-check:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create S0/S1 progress check issue
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const week = new Date().toISOString().slice(0, 10);
+            const title = `[agent] 本周 S0/S1 进度检查 · ${week}`;
+            const body = `## 自动创建（无 LLM）
+
+            本 issue 由 \`agent-backlog.yml\` 每周 schedule 创建，供 agent 或 Moses 开机时处理。
+
+            ### 检查清单
+
+            - [ ] \`main\` 上 **Server CI** 绿：https://github.com/${context.repo.owner}/${context.repo.repo}/actions/workflows/server-ci.yml
+            - [ ] **Railway staging** \`/health\` 可访问（见 \`MOSES_STATUS.md\` / \`track-a/deploy/DEPLOYMENT_STATUS.md\`）
+            - [ ] \`KEEL_STAGING_URL\` GitHub Variable 已填（若 staging 已上线）
+            - [ ] S0 issue / \`issues/001-S0-railway-bridge.md\` 剩余项
+            - [ ] S1 Bridge：\`JIUSHU_ONBOARDING.md\`、快捷指令模板、\`ACCEPTANCE.md\` A0
+            - [ ] \`SESSION_LOG.md\` 有本周 handoff
+
+            ### Agent 读序
+
+            1. \`MOSES_STATUS.md\`
+            2. \`PLAYBOOK.md\` 当前阶段
+            3. \`SESSION_LOG.md\` 最新一轮
+            4. Open issues with label \`agent\`
+
+            ### 参考
+
+            - \`AUTONOMOUS_DEV.md\`
+            - \`issues/\` 目录草稿
+
+            ---
+            *关闭方式：处理完毕后在 PR 中更新 \`SESSION_LOG.md\` 并 close。*`;
+
+            const { data: existing } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'agent',
+              per_page: 30,
+            });
+
+            const dup = existing.find(i => i.title.includes('S0/S1 进度检查') && i.title.includes(week));
+            if (dup) {
+              core.info(`Skip duplicate: #${dup.number}`);
+              return;
+            }
+
+            const { data: issue } = await github.rest.issues.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title,
+              body,
+              labels: ['agent'],
+            });
+            core.info(`Created issue #${issue.number}`);

@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - 'track-a/server/**'
+      - 'track-a/Dockerfile'
+      - 'track-a/railway.toml'
       - '.github/workflows/server-ci.yml'
   pull_request:
     branches: [main]

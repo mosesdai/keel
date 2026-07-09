@@ -169,3 +169,29 @@
   1. Moses：`RAILWAY_傻瓜版.md` 步骤 1–7 → 回复 `Railway URL: https://….up.railway.app`。
   2. Agent：`RAILWAY_STAGING_CHECKLIST.md` 验收 + 更新 `DEPLOYMENT_STATUS.md`。
   3. 可选：GitHub Variable `KEEL_STAGING_URL`；issue #1。
+
+---
+
+## [2026-07-10] 第 6 轮 · Moses 回归 · GitHub 自主开发机制
+
+- **本轮目标**：审计 repo 状态；建立 Moses 关机后 agent 可持续工作的文档 + Actions + issue 草稿；诚实说明 Actions 不能替 Agent 写代码。
+
+- **本轮做了什么**：
+  - 审计：`main` 与 `origin/main`、`fix/railway-track-a-deploy` 同 commit `ea77bb1`（Railway Docker fix 已在 main，无需再 merge）。
+  - 新增 [`AUTONOMOUS_DEV.md`](./AUTONOMOUS_DEV.md)（触发器、读序、可做/不可做、ipitch 映射、现实约束）。
+  - 新增 [`MOSES_STATUS.md`](./MOSES_STATUS.md)（Railway 2 步、3 检查点、下一 issue 建议）。
+  - 新增 `.github/ISSUE_TEMPLATE/agent-task.md`；`.github/workflows/agent-backlog.yml`（每周 S0/S1 进度 issue，无 LLM）。
+  - 增强 `deploy-server.yml` 注释（Railway GitHub 集成不必 `RAILWAY_TOKEN`）；`server-ci` / `docs-check` 路径更新。
+  - 新增 `issues/002-S1-bridge-jiushu.md`、`003-ios-scaffold.md`、`004-demo-from-research05.md`。
+  - 更新 `RESUME.md`、本日志。
+
+- **本轮结论**：
+  - **无人值守**：CI、Railway 自动 deploy（配好后）、每周 backlog issue、文档/issue 管理。
+  - **仍需 Moses 或 Cloud Agent**：Swift/复杂 PR、九叔装机、Apple 签名、Secrets 填值。
+  - **P0 阻塞仍为 Railway**：Moses 只需 Root Directory `track-a` + Redeploy（见 `MOSES_STATUS.md`）。
+
+- **下次从这里继续**：
+  1. Moses：`RAILWAY_傻瓜版.md` 或 `MOSES_STATUS.md` 2 步 → 发 `Railway URL: https://…`（勿发 key）。
+  2. Agent：staging 验收 `RAILWAY_STAGING_CHECKLIST.md`；更新 `DEPLOYMENT_STATUS.md`。
+  3. Moses 粘贴 issue：Railway 好后 → `issues/002`；否则可先 `issues/004` demo。
+  4. 可选：Cursor Cloud Agent 处理 label `agent` 的 issues。

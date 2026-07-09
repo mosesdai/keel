@@ -1,5 +1,13 @@
 name: Deploy server (Railway)
 
+# Deploy paths (pick one):
+# 1. **Recommended — Railway GitHub integration** (no RAILWAY_TOKEN):
+#    Railway Dashboard → Deploy from GitHub → repo mosesdai/keel → Root Directory: track-a
+#    Push to main under track-a/ triggers Railway build automatically; this workflow only verifies health.
+# 2. **Optional — RAILWAY_TOKEN + CLI**: set secret; extend the "Deploy via CLI" step below.
+#
+# See: RAILWAY_傻瓜版.md, track-a/deploy/RAILWAY_WALKTHROUGH.md, MOSES_STATUS.md
+
 on:
   workflow_dispatch:
   push:
@@ -15,15 +23,17 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Deploy placeholder
+      - name: Railway deploy mode
         env:
           RAILWAY_TOKEN: ${{ secrets.RAILWAY_TOKEN }}
         run: |
-          if [ -z "${RAILWAY_TOKEN}" ]; then
-            echo "::notice::RAILWAY_TOKEN not set — skip deploy. Connect Railway GitHub integration or add secret."
-            exit 0
+          if [ -n "${RAILWAY_TOKEN}" ]; then
+            echo "::notice::RAILWAY_TOKEN set — CLI deploy can be wired here (optional)."
+            echo "::notice::See GITHUB_SETUP.md Step 4 for railway CLI."
+          else
+            echo "::notice::No RAILWAY_TOKEN — OK if Railway GitHub integration deploys track-a/ on push."
+            echo "::notice::Moses: Root Directory = track-a (RAILWAY_傻瓜版.md). Actions does not replace Dashboard deploy."
           fi
-          echo "::notice::RAILWAY_TOKEN is set. Wire railway CLI deploy in a follow-up PR (see GITHUB_SETUP.md Step 4)."
 
       - name: Post-deploy health (optional)
         env:

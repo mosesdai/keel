@@ -8,9 +8,10 @@
 | 项 | 结果 |
 |----|------|
 | 仓库 | **https://github.com/mosesdai/keel** |
-| 命令 | `git push -u origin main` 成功，`main -> main` |
-| 跟踪 | `branch 'main' set up to track 'origin/main'` |
-| 下一步 | GitHub Actions Secrets → Railway 连 repo → issue #1（见 `issues/001-S0-railway-bridge.md`） |
+| 分支 | `main` @ `ea77bb1+`（含 Railway Docker fix + 2026-07-10 自主开发机制） |
+| Secrets | ✅ `KEEL_API_KEY`、`DEEPSEEK_API_KEY` |
+| 自主开发 | ✅ `AUTONOMOUS_DEV.md`、`MOSES_STATUS.md`、`agent-backlog.yml` |
+| 下一步 | Railway Root `track-a` + Redeploy → 见 `MOSES_STATUS.md` |
 
 ---
 

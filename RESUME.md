@@ -1,13 +1,15 @@
 # 下次入口指南 · 军师 app / 主见 Keel
 
 > 工作区：`/Users/Eliam-Code/20260701 军师 app/`  
-> 最后更新：2026-07-09（GitHub push ✅）
+> 最后更新：2026-07-10（主线 = GitHub 自主开发）
 
 ---
 
-## ★ 关机前先看（Moses）
+## ★ 关机前 / 回归先看（Moses）
 
-**[`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md)** — 约 15–20 分钟做完即可关电脑；agent 在 GitHub/云上继续，仅决策门禁再叫醒你。
+**[`MOSES_STATUS.md`](./MOSES_STATUS.md)** — 一页纸：Railway 2 步、什么已无人值守、3 个检查点。  
+**[`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md)** — 完整关机清单。  
+**[`AUTONOMOUS_DEV.md`](./AUTONOMOUS_DEV.md)** — agent 关机后如何持续工作。
 
 ---
 
@@ -56,6 +58,8 @@ uvicorn app:app --host 0.0.0.0 --port 8787 --reload
 | | `track-a/server/QUALITY_TESTS.md` | 验收质量用例 |
 | ★ | `DISTRIBUTION.md` | **iPhone 分发**：Bridge Track、Ad Hoc AirDrop、TestFlight 对比与操作 |
 | ★ | `PLAYBOOK.md` | 云上自主开发阶段与门禁 |
+| ★ | `AUTONOMOUS_DEV.md` | 无人值守触发器、读序、门禁 |
+| ★ | `MOSES_STATUS.md` | Moses 一页纸状态 |
 | ★ | `GITHUB_SETUP.md` | GitHub/Railway/Apple 一次性设置 |
 | ★ | `ROADMAP.md` | 日期里程碑与分发路径 |
 
@@ -65,8 +69,10 @@ uvicorn app:app --host 0.0.0.0 --port 8787 --reload
 
 - **仓库**：https://github.com/mosesdai/keel  
 - **Remote**：`origin` → `https://github.com/mosesdai/keel.git`  
-- **状态**：`main` 已 push 并跟踪 `origin/main`（2026-07-09）  
-- **Secrets / Railway**：见根目录 `GITHUB_SECRETS.md`；S0 任务见 `issues/001-S0-railway-bridge.md`
+- **状态**：`main` @ `ea77bb1+`；含 Railway Docker fix、自主开发机制（2026-07-10）  
+- **Secrets**：✅ `KEEL_API_KEY`、`DEEPSEEK_API_KEY`  
+- **Railway**：⏳ Moses 2 步（Root `track-a` + Redeploy）— 见 `MOSES_STATUS.md`  
+- **Issues 草稿**：`issues/001`–`004`；模板 `.github/ISSUE_TEMPLATE/agent-task.md`
 
 ---
 
