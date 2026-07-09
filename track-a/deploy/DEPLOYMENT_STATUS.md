@@ -7,9 +7,22 @@
 | **Staging URL** | `https://keel-production-be1c.up.railway.app`（`/health`：[链接](https://keel-production-be1c.up.railway.app/health)） |
 | **Railway 项目** | keel-production（Moses 部署） |
 | **Root Directory** | `track-a` |
-| **最后 `/health` 检查** | **2026-07-10 07:03 JST** — **ok** HTTP 200，`"status":"ok"`；**`"api_key_configured":false`**（Railway 未注入 `KEEL_API_KEY`） |
-| **最后 `/v1/entry` 检查** | **2026-07-10 07:03 JST** — **fail** HTTP 503（无 `KEEL_API_KEY` 时连无头 POST 也 503；补 key + Redeploy 后期望 401/200） |
+| **最后 `/health` 检查** | **2026-07-10 07:15 JST** — **ok** HTTP **200**，`"status":"ok"`，**`"api_key_configured":true`** |
+| **最后 `/v1/entry` 检查** | **2026-07-10 07:15 JST** — **ok** HTTP **200**（有效 `X-API-Key`）；无效 Key → **401**。Smoke 回复曾含「本地兜底」→ 建议确认 Railway **`DEEPSEEK_API_KEY`** 有效 |
 | **KEEL_STAGING_URL（GitHub Variable）** | **待填** → `https://keel-production-be1c.up.railway.app`（**无尾斜杠**） |
-| **备注** | 补 Variables 步骤：[`track-a/server/RAILWAY_VARIABLES_傻瓜版.md`](../server/RAILWAY_VARIABLES_傻瓜版.md)；九叔 POST URL：`track-a/shortcuts/KEEL_URL.txt` |
+| **备注** | 九叔 POST URL：[`../shortcuts/KEEL_URL.txt`](../shortcuts/KEEL_URL.txt)；变量：[`../server/RAILWAY_VARIABLES_傻瓜版.md`](../server/RAILWAY_VARIABLES_傻瓜版.md) |
 
-**Moses 下一步**：Railway Variables 添加 `KEEL_API_KEY`、`DEEPSEEK_API_KEY`、`DEEPSEEK_MODEL_DEFAULT` → **Redeploy** → `/health` 应出现 `api_key_configured: true`。
+### curl 验收命令（不含 key）
+
+```bash
+# Health
+curl -sS "https://keel-production-be1c.up.railway.app/health"
+
+# Entry（需替换 YOUR_KEEL_API_KEY）
+curl -sS -X POST "https://keel-production-be1c.up.railway.app/v1/entry" \
+  -H "Content-Type: application/json" \
+  -H "X-API-Key: YOUR_KEEL_API_KEY" \
+  -d '{"topic_slug":"tencent-ali-renewal","raw_text":"smoke test","advice_intensity":3}'
+```
+
+**Moses 可选下一步**：确认 Railway `DEEPSEEK_API_KEY` → Redeploy → entry 回复应为真实 DeepSeek 而非 mock。

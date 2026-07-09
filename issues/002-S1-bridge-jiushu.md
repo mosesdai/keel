@@ -16,20 +16,22 @@
 
 ### A. 快捷指令与 URL Scheme（agent）
 
-- [ ] 核对 `track-a/shortcuts/SETUP.md` 与 staging URL 占位符 `{{KEEL_API_URL}}` / `{{KEEL_API_KEY}}`
+- [x] 核对 `track-a/shortcuts/SETUP.md` 与 staging URL（`https://keel-production-be1c.up.railway.app/v1/entry`）
 - [ ] 更新 `track-a/shortcuts/keel-entry.shortcut.json` 与 payload 模板（若 API 路径有变）
 - [ ] 文档化 **Back Tap / 辅助触控** 触发快捷指令（可选增强，见 Apple 文档链接）
 - [ ] `track-a/shortcuts/URL_SCHEME.md` 与 demo Live 模式对齐
 
 ### B. 九叔 onboarding（agent 写文档；Moses 执行）
 
-- [ ] `track-a/JIUSHU_ONBOARDING.md`：15 分钟脚本含腾讯/阿里/版权三段真话
-- [ ] 微信可转发版「安装到主屏」短说明（1 屏以内，discreet）
+- [x] `track-a/JIUSHU_ONBOARDING.md`：15 分钟脚本 + 真实 URL / Key 引用
+- [x] `track-a/shortcuts/JIUSHU_5MIN.md` + 根目录 `JIUSHU_BRIDGE_READY.md`
+- [x] 微信可转发版「安装到主屏」短说明（见 onboarding 文末）
 - [ ] Moses：九叔手机完成一次安装 + 首测（**decision-gate**：交给九叔前 go/no-go）
 
 ### C. 验收
 
-- [ ] staging `/health` ok 后，端到端：文字/语音 → 军师回复 → iCloud/落盘路径可见
+- [x] staging `/health` ok（`api_key_configured: true`，2026-07-10）
+- [ ] 端到端：文字/语音 → 军师回复 → iCloud/落盘路径可见（待九叔真机）
 - [ ] 军师至少一次给出**反对意见**或 disruptive 备选，语气不冒犯
 - [ ] `ACCEPTANCE.md` A0 Bridge 项勾选
 

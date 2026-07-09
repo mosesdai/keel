@@ -1,7 +1,22 @@
 # 九叔 Onboarding（15 分钟当面教）
 
 > 目标：不是教功能，而是让九叔马上开始思考「腾讯阿里版权续约」，并感到被真实帮助。  
-> 口径：这是 7 月中旬前的过渡版，数据在 iCloud，先把“敢说真话 + 得到有力度建议”跑起来。
+> 口径：这是 7 月中旬前的过渡版，数据在 iCloud，先把“敢说真话 + 得到有力度建议”跑起来。  
+> **5 分钟压缩版**：[`shortcuts/JIUSHU_5MIN.md`](./shortcuts/JIUSHU_5MIN.md) · **装机清单**：[`../JIUSHU_BRIDGE_READY.md`](../JIUSHU_BRIDGE_READY.md)
+
+---
+
+## 装机参数（Moses 填好再给九叔）
+
+| 项 | 值 |
+|----|-----|
+| **API URL** | `https://keel-production-be1c.up.railway.app/v1/entry`（亦见 [`shortcuts/KEEL_URL.txt`](./shortcuts/KEEL_URL.txt)） |
+| **KEEL_API_KEY** | 与 Moses 本地 `track-a/server/.env` 中 `KEEL_API_KEY=` **完全一致**（当面口述 / 密码管理器；**勿微信明文、勿写进 repo**） |
+| **快捷指令名** | `主见`（主屏幕图标同名，discreet） |
+| **逐步搭建** | [`shortcuts/SETUP.md`](./shortcuts/SETUP.md) |
+
+**健康检查**（可选，给九叔看「连上了」）：浏览器打开  
+`https://keel-production-be1c.up.railway.app/health` → 应见 `"status":"ok"`。
 
 ---
 
@@ -23,11 +38,14 @@
 
 ## 5-8 分钟：手把手第一次操作
 
-1. 点开快捷指令「主见」  
+1. 点主屏 **「主见」**（或快捷指令 App 里同名）  
 2. 直接说第一段（长段）  
 3. 出现转写后，手改 1-2 个错字  
-4. 选 topic：`腾讯阿里版权`  
-5. 看军师回复（重点看“反对意见”和“disruptive 备选”）
+4. 选 topic：**腾讯阿里版权续约**（slug `tencent-ali-renewal`）  
+5. 看军师回复（重点看 **反对意见** 和 **disruptive 备选**）
+
+> 若报错 **401**：Key 不对，找 Moses 核对 Railway Variables 与快捷指令 Header。  
+> 若 **503**：云端未配 Key，Moses 在 Railway 补 `KEEL_API_KEY` 后 Redeploy。
 
 ---
 
@@ -59,3 +77,12 @@
 这版是过渡版，7 月中旬前先让你稳定用起来。  
 你每天只要说 3 段，主见会把立场和快照长出来。  
 你哪里觉得不顺、哪里觉得它顶得不对，直接说，我按你的真实使用反馈迭代。
+
+---
+
+## 微信可转发（1 屏 · discreet）
+
+```
+九叔，「主见」装好了：主屏点图标 → 说话 → 改错字 → 选腾讯阿里版权 → 看回复。
+有问题找 Moses；不用 Cursor。
+```

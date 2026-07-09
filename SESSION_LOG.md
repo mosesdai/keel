@@ -18,6 +18,29 @@
 
 ---
 
+## [2026-07-10] 第 8 轮 · Moses 关机前全量 handoff
+
+- **本轮目标**：Moses 离开前把文档、九叔 Bridge、demo/iOS、issues 索引与 curl 验收落盘并 push GitHub。
+
+- **本轮做了什么**：
+  - curl：`GET /health` → **200**，`api_key_configured: **true**`；`POST /v1/entry`（有效 Key）→ **200**（曾 mock 兜底，建议查 Railway `DEEPSEEK_API_KEY`）。
+  - 新建 `DEEPSEEK_余额与预算.md`、`JIUSHU_BRIDGE_READY.md`、`track-a/shortcuts/JIUSHU_5MIN.md`、`issues/README.md`。
+  - 完善 `JIUSHU_ONBOARDING.md`、`shortcuts/SETUP.md`（真实 Railway URL + Key 引用方式）。
+  - demo：确认卡、prompt chips、三段回复结构、Mac 状态条 mock、低置信度错误态（research/05 §5）。
+  - `ios/Keel/` SwiftUI 占位（`KeelApp.swift`、`ContentView.swift`、README）。
+  - 更新 `MOSES_STATUS.md`、`DEPLOYMENT_STATUS.md`、本日志。
+
+- **本轮结论**：
+  - **GitHub = 唯一 handoff**；关机后 Cursor 不能继续，回来读 `MOSES_STATUS.md` 或说「继续军师 app」。
+  - **7/15 阻塞**转为九叔真机装机（Moses decision-gate）。
+
+- **下次从这里继续**：
+  1. Moses：[`JIUSHU_BRIDGE_READY.md`](./JIUSHU_BRIDGE_READY.md) → 九叔 5 分钟装 [`track-a/shortcuts/JIUSHU_5MIN.md`](./track-a/shortcuts/JIUSHU_5MIN.md)。
+  2. 可选：GitHub Variable `KEEL_STAGING_URL`；Railway 确认 DeepSeek 非 mock。
+  3. Agent：粘贴 GitHub issue **002**；推进 `ios/` CI（`003`）。
+
+---
+
 ## [2026-07-10] 第 7 轮 · Railway staging 上线验收
 
 - **本轮目标**：Moses Railway 部署成功后公网 curl 验收，更新部署/状态文档并 push。
