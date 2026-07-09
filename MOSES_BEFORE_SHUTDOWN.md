@@ -1,6 +1,7 @@
 # Moses 关机前必做清单（复制即用）
 
-> **不懂 GitHub Secrets 怎么填？请看** [`GITHUB_SECRETS_傻瓜版.md`](./GITHUB_SECRETS_傻瓜版.md)
+> **不懂 GitHub Secrets 怎么填？请看** [`GITHUB_SECRETS_傻瓜版.md`](./GITHUB_SECRETS_傻瓜版.md)  
+> **不懂 Railway 怎么部署？请看** [`RAILWAY_傻瓜版.md`](./RAILWAY_傻瓜版.md)
 
 > **仓库**：https://github.com/mosesdai/keel  
 > **工作区**：`/Users/Eliam-Code/20260701 军师 app/`  
@@ -8,9 +9,20 @@
 
 ---
 
+## 进度速览
+
+| 步骤 | 状态 |
+|------|------|
+| GitHub Secrets（`KEEL_API_KEY`、`DEEPSEEK_API_KEY`） | ✅ Moses 已完成 |
+| Railway 部署 + `/health` 公网可访问 | ⏳ **待做**（见步骤 2） |
+| `KEEL_STAGING_URL` 回填 GitHub Variable | ⏳ Railway 域名生成后 |
+| URL 告诉 Agent | ⏳ Railway 完成后 |
+
+---
+
 ## 一、关机前必须做（做完可关电脑）
 
-### 步骤 1 · GitHub Secrets（约 5 分钟）
+### 步骤 1 · GitHub Secrets（约 5 分钟）✅ 已完成
 
 1. 打开：https://github.com/mosesdai/keel → **Settings** → **Secrets and variables** → **Actions**
 2. 点 **New repository secret**，按 [`GITHUB_SECRETS.md`](./GITHUB_SECRETS.md) 填下面 **3 项必填**（值从本机 `track-a/server/.env` 复制，**勿粘贴到 Cursor 聊天**）：
@@ -27,7 +39,9 @@
 
 ---
 
-### 步骤 2 · Railway 连 GitHub 并部署（约 8–12 分钟）
+### 步骤 2 · Railway 连 GitHub 并部署（约 8–12 分钟）⏳ **下一步**
+
+> **零基础逐步**：[`RAILWAY_傻瓜版.md`](./RAILWAY_傻瓜版.md)
 
 1. 登录 https://railway.app（建议用 GitHub 登录）
 2. **New Project** → **Deploy from GitHub repo** → 选 **`mosesdai/keel`**
@@ -36,12 +50,13 @@
    - `KEEL_API_KEY`（与步骤 1 相同）
    - `DEEPSEEK_API_KEY`（与步骤 1 相同）
    - `DEFAULT_PROVIDER` = `deepseek`
-   - （可选）`DASHSCOPE_API_KEY`
+   - `DEEPSEEK_MODEL_DEFAULT` = `deepseek-chat`
+   - `DEEPSEEK_MODEL_DEEP` = `deepseek-reasoner`
 5. **Settings → Networking → Generate Domain**，得到形如 `https://….up.railway.app` 的 URL
 6. 浏览器打开：`https://你的域名/health`，应返回 ok
 7. 回到 GitHub → **Settings → Secrets and variables → Actions → Variables**，把该 URL 写入 **`KEEL_STAGING_URL`**
 
-手把手图文：`track-a/deploy/RAILWAY_WALKTHROUGH.md`
+详细版：`track-a/deploy/RAILWAY_WALKTHROUGH.md` · 部署后验收：`track-a/deploy/RAILWAY_STAGING_CHECKLIST.md`
 
 ---
 
@@ -67,7 +82,7 @@
 
 ### 关机前自检（30 秒）
 
-- [ ] GitHub 已有 `KEEL_API_KEY`、`DEEPSEEK_API_KEY`（Secrets）
+- [x] GitHub 已有 `KEEL_API_KEY`、`DEEPSEEK_API_KEY`（Secrets）
 - [ ] Railway Root = `track-a`，Variables 已填，`/health` 公网可访问
 - [ ] （建议）`KEEL_STAGING_URL` 已填
 - [ ] URL 已告诉 agent 或写入 `DEPLOYMENT_STATUS.md`
@@ -126,4 +141,4 @@
 
 ---
 
-*最后更新：2026-07-09*
+*最后更新：2026-07-09 · Secrets ✅，Railway 待做*

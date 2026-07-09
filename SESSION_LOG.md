@@ -143,6 +143,29 @@
   - 阻塞转为：GitHub Actions Secrets、Railway 部署、Bridge Track 7/15 验收。
 
 - **下次从这里继续**：
-  1. Moses：按 `GITHUB_SECRETS.md` 填 repo Secrets；Railway Dashboard 连 GitHub（root `track-a`）。
-  2. 网页创建 issue #1（粘贴 `issues/001-S0-railway-bridge.md`）或安装 `gh` 后由 agent 创建。
-  3. Agent：PR 接通 Railway deploy + staging `KEEL_STAGING_URL`；S1 按 `ACCEPTANCE.md` Bridge 推进。
+  1. Moses：按 `RAILWAY_傻瓜版.md` 完成 Railway 部署 → 发 `Railway URL: https://…`。
+  2. Agent：用 `RAILWAY_STAGING_CHECKLIST.md` 跑 staging 验收；更新 `DEPLOYMENT_STATUS.md`。
+  3. Moses（可选）：回填 `KEEL_STAGING_URL` GitHub Variable；创建 issue #1。
+  4. S1 Bridge Track 按 `ACCEPTANCE.md` A0 推进。
+
+---
+
+## [2026-07-09] 第 5 轮 · Secrets 完成 + Railway 傻瓜版
+
+- **本轮目标**：Moses 确认 GitHub Secrets 已填；产出 Railway 零基础部署文档；agent 自主推进 demo / 验收清单。
+
+- **本轮做了什么**：
+  - Moses 回复「secrets 填好了」→ GitHub `KEEL_API_KEY`、`DEEPSEEK_API_KEY` 视为 ✅。
+  - 新增 [`RAILWAY_傻瓜版.md`](./RAILWAY_傻瓜版.md)（中文逐步：GitHub 登录 Railway → Root `track-a` → Variables → Generate Domain → `/health`）。
+  - 新增 [`track-a/deploy/RAILWAY_STAGING_CHECKLIST.md`](./track-a/deploy/RAILWAY_STAGING_CHECKLIST.md)（agent 部署后 curl 验收）。
+  - 更新 [`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md)：Secrets ✅，Railway ⏳ 下一步。
+  - demo 轻量改进（`research/05-UI-UX与开源参考.md` §5）：topic pill 切换、通知普通/隐身预览、力谏三档 segmented、历史状态标签。
+
+- **本轮结论**：
+  - **阻塞转为 Railway 人工部署**（约 8–12 分钟）；Moses 做完即可关机。
+  - Agent 无法在 Moses 浏览器代填 Railway Variables；staging 验收待 URL 到位后执行。
+
+- **下次从这里继续**：
+  1. Moses：`RAILWAY_傻瓜版.md` 步骤 1–7 → 回复 `Railway URL: https://….up.railway.app`。
+  2. Agent：`RAILWAY_STAGING_CHECKLIST.md` 验收 + 更新 `DEPLOYMENT_STATUS.md`。
+  3. 可选：GitHub Variable `KEEL_STAGING_URL`；issue #1。

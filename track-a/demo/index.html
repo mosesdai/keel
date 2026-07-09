@@ -135,30 +135,43 @@
       font-size: var(--font-micro);
       letter-spacing: .06em;
       color: var(--text-muted);
-      margin-bottom: 6px;
+      margin-bottom: 8px;
     }
 
-    .topic-select {
-      width: 100%;
-      appearance: none;
-      background: var(--surface-elevated);
-      border: 1px solid rgba(196,165,116,.22);
-      color: var(--text);
-      padding: 12px 40px 12px 16px;
-      border-radius: var(--radius-sm);
-      font-size: var(--font-body);
+    .topic-pills {
+      display: flex;
+      gap: 8px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .topic-pills::-webkit-scrollbar { display: none; }
+
+    .topic-pill {
+      flex-shrink: 0;
+      padding: 8px 14px;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 13px;
       font-weight: 500;
-      box-shadow: var(--shadow-card);
-      transition: border-color .2s, box-shadow .2s;
-      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23c4a574' d='M1 1l5 5 5-5'/%3E%3C/svg%3E");
-      background-repeat: no-repeat;
-      background-position: right 16px center;
+      cursor: pointer;
+      transition: border-color .2s, background .2s, color .2s;
+      font-family: inherit;
     }
 
-    .topic-select:focus {
-      outline: none;
+    .topic-pill.active {
       border-color: rgba(196,165,116,.45);
-      box-shadow: 0 0 0 3px rgba(196,165,116,.12), var(--shadow-card);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .topic-pill:focus-visible {
+      outline: 2px solid rgba(196,165,116,.4);
+      outline-offset: 2px;
     }
 
     .notify-preview {
@@ -207,6 +220,83 @@
       margin-top: 6px;
       opacity: .8;
     }
+
+    .notify-mode-toggle {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .notify-mode-btn {
+      padding: 4px 10px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 10px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .notify-mode-btn.active {
+      border-color: rgba(196,165,116,.35);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .force-segments {
+      display: flex;
+      gap: 6px;
+      margin-bottom: 12px;
+    }
+
+    .force-seg-btn {
+      flex: 1;
+      padding: 8px 4px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 11px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color .2s, background .2s, color .2s;
+    }
+
+    .force-seg-btn.active {
+      border-color: rgba(196,165,116,.4);
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .force-advanced {
+      margin-top: 4px;
+    }
+
+    .force-advanced summary {
+      font-size: 10px;
+      color: var(--text-subtle);
+      cursor: pointer;
+      list-style: none;
+      margin-bottom: 8px;
+    }
+
+    .force-advanced summary::-webkit-details-marker { display: none; }
+
+    .history-status {
+      display: inline-block;
+      font-size: 10px;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-top: 6px;
+      border: 1px solid var(--border);
+      color: var(--text-muted);
+    }
+
+    .history-status.pending { border-color: rgba(196,165,116,.3); color: var(--accent); background: var(--accent-dim); }
+    .history-status.verified { border-color: rgba(106,158,122,.3); color: var(--success); background: rgba(106,158,122,.08); }
+    .history-status.overturned { border-color: rgba(201,106,90,.3); color: var(--danger); background: rgba(201,106,90,.08); }
 
     .force-bar {
       margin: 14px 16px 0;
@@ -998,8 +1088,8 @@
         </div>
       </div>
       <div class="topic-wrap">
-        <label class="topic-label" for="topicSelect">当前话题</label>
-        <select class="topic-select" id="topicSelect" aria-label="切换话题"></select>
+        <span class="topic-label">当前话题</span>
+        <div class="topic-pills" id="topicPills" role="tablist" aria-label="切换话题"></div>
       </div>
     </header>
 
@@ -1009,6 +1099,10 @@
         <div class="notify-app">主见 · 刚刚</div>
         <div class="notify-text" id="notifyText">今天的整理已就绪</div>
         <div class="notify-hint">锁屏 / 通知栏不显示话题、人物或异议内容</div>
+        <div class="notify-mode-toggle" role="group" aria-label="通知预览模式">
+          <button type="button" class="notify-mode-btn active" data-mode="normal">普通预览</button>
+          <button type="button" class="notify-mode-btn" data-mode="stealth">隐身模式</button>
+        </div>
       </div>
     </div>
 
@@ -1017,18 +1111,26 @@
         <span>力谏强度</span>
         <span class="force-level-name" id="forceLevelName">常态 · 3</span>
       </div>
-      <div class="force-track-wrap">
-        <div class="force-ticks" aria-hidden="true">
-          <span class="force-tick"></span><span class="force-tick"></span><span class="force-tick"></span><span class="force-tick"></span><span class="force-tick"></span>
+      <div class="force-segments" role="group" aria-label="力谏三档">
+        <button type="button" class="force-seg-btn" data-level="2">留余地</button>
+        <button type="button" class="force-seg-btn active" data-level="3">直说</button>
+        <button type="button" class="force-seg-btn" data-level="4">力谏</button>
+      </div>
+      <details class="force-advanced">
+        <summary>精细调节（1–5）</summary>
+        <div class="force-track-wrap">
+          <div class="force-ticks" aria-hidden="true">
+            <span class="force-tick"></span><span class="force-tick"></span><span class="force-tick"></span><span class="force-tick"></span><span class="force-tick"></span>
+          </div>
+          <input type="range" class="force-slider" id="forceSlider" min="1" max="5" step="1" value="3"
+            aria-valuemin="1" aria-valuemax="5" aria-valuenow="3" aria-label="力谏强度滑块">
         </div>
-        <input type="range" class="force-slider" id="forceSlider" min="1" max="5" step="1" value="3"
-          aria-valuemin="1" aria-valuemax="5" aria-valuenow="3" aria-label="力谏强度滑块">
-      </div>
-      <div class="force-scale">
-        <span>平和</span>
-        <span>常态</span>
-        <span>呛人</span>
-      </div>
+        <div class="force-scale">
+          <span>平和</span>
+          <span>常态</span>
+          <span>呛人</span>
+        </div>
+      </details>
     </div>
 
     <main class="main">
@@ -1126,6 +1228,19 @@
 (function () {
   'use strict';
 
+  var FORCE_SEGMENTS = { 2: '留余地', 3: '直说', 4: '力谏' };
+
+  var NOTIFY_TEXTS = {
+    normal: { default: '今天的整理已就绪', live: '你有一条新的记录', stealth: '有一条立场需要复盘' },
+    stealth: { default: '有一条立场需要复盘', live: '有新提醒', stealth: '有新提醒' }
+  };
+
+  var HISTORY_STATUS = {
+    pending: '待验证',
+    verified: '已验证',
+    overturned: '推翻'
+  };
+
   var FORCE_LEVELS = [
     { level: 1, name: '平和', short: '平和 · 1', color: '#6a9e7a' },
     { level: 2, name: '轻扶', short: '轻扶 · 2', color: '#7a9e8a' },
@@ -1144,7 +1259,8 @@
       timestamp: '2026-07-04T09:15:00Z',
       raw_text: '腾讯阿里版权续约：我倾向谨慎观察，暂不对外表态，等双方声明和独家比例信号明朗再说。',
       reply: SAMPLE_REPLY_TENCENT,
-      advice_intensity: 4
+      advice_intensity: 4,
+      status: 'pending'
     },
     {
       id: 'h-ta-2',
@@ -1153,7 +1269,8 @@
       timestamp: '2026-07-03T14:20:00Z',
       raw_text: '阿里侧音乐版权池续约传闻还没证实，我先维持观望，不急着站队。',
       reply: '观望在信息真空期是合理默认，但「不站队」不等于「无动作」。\n\n若错，最可能错在：把未证实当成无风险——渠道侧可能已在调整排他条款。\n\n48 小时可验证：向下游合作方确认是否收到独家比例调整通知。\n\n常规打法：维持中性口径。激进备选：主动约一方私下摸底，用结构化试探换信息。',
-      advice_intensity: 3
+      advice_intensity: 3,
+      status: 'verified'
     },
     {
       id: 'h-lining-1',
@@ -1228,6 +1345,7 @@
     apiKey: localStorage.getItem('keel_api_key') || '',
     submitting: false,
     forceLevel: 3,
+    notifyMode: 'normal',
     history: MOCK_HISTORY.slice()
   };
 
@@ -1267,6 +1385,15 @@
     $('forceSlider').setAttribute('aria-valuenow', String(level));
     $('forceBar').style.borderColor = info.color + '55';
     $('forceBar').style.setProperty('--force-thumb', info.color);
+    document.querySelectorAll('.force-seg-btn').forEach(function (btn) {
+      btn.classList.toggle('active', parseInt(btn.dataset.level, 10) === level);
+    });
+  }
+
+  function setNotifyText(kind) {
+    var mode = state.notifyMode;
+    var texts = NOTIFY_TEXTS[mode] || NOTIFY_TEXTS.normal;
+    $('notifyText').textContent = texts[kind] || texts.default;
   }
 
   function formatTimestamp(ts) {
@@ -1311,6 +1438,9 @@
           '</div>' +
           '<div class="history-preview">' + escapeHtml(h.raw_text) + '</div>' +
           (intensityLabel ? '<span class="history-intensity">力谏 ' + escapeHtml(intensityLabel) + '</span>' : '') +
+          (h.status && HISTORY_STATUS[h.status]
+            ? '<span class="history-status ' + h.status + '">' + HISTORY_STATUS[h.status] + '</span>'
+            : '') +
         '</div>' +
         '<div class="history-detail">' +
           '<div class="history-block">' +
@@ -1380,16 +1510,24 @@
     }
   }
 
-  function renderTopicSelect() {
-    var sel = $('topicSelect');
-    sel.innerHTML = '';
+  function renderTopicPills() {
+    var wrap = $('topicPills');
+    wrap.innerHTML = '';
     Object.keys(TOPICS).forEach(function (slug) {
-      var opt = document.createElement('option');
-      opt.value = slug;
-      opt.textContent = TOPICS[slug].name;
-      sel.appendChild(opt);
+      var btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = 'topic-pill' + (slug === state.topic ? ' active' : '');
+      btn.textContent = TOPICS[slug].name;
+      btn.dataset.slug = slug;
+      btn.setAttribute('role', 'tab');
+      btn.setAttribute('aria-selected', slug === state.topic ? 'true' : 'false');
+      btn.addEventListener('click', function () {
+        state.topic = slug;
+        renderTopicPills();
+        loadTopicUI();
+      });
+      wrap.appendChild(btn);
     });
-    sel.value = state.topic;
   }
 
   function renderPosition() {
@@ -1555,7 +1693,7 @@
           advice_intensity: state.forceLevel
         });
         renderHistory();
-        $('notifyText').textContent = '你有一条新的记录';
+        setNotifyText('live');
         usedLive = true;
       } catch (err) {
         renderReply(t.sampleReply + '\n\n—\n（Live 请求失败：' + (err.message || '网络错误') + '，以上为演示回复）', false);
@@ -1577,7 +1715,7 @@
         advice_intensity: state.forceLevel
       });
       renderHistory();
-      $('notifyText').textContent = '今天的整理已就绪';
+      setNotifyText('default');
     }
 
     switchTab('speak');
@@ -1596,9 +1734,20 @@
     btn.addEventListener('click', function () { switchTab(btn.dataset.tab); });
   });
 
-  $('topicSelect').addEventListener('change', function () {
-    state.topic = this.value;
-    loadTopicUI();
+  document.querySelectorAll('.force-seg-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      setForceLevel(parseInt(btn.dataset.level, 10));
+    });
+  });
+
+  document.querySelectorAll('.notify-mode-btn').forEach(function (btn) {
+    btn.addEventListener('click', function () {
+      state.notifyMode = btn.dataset.mode;
+      document.querySelectorAll('.notify-mode-btn').forEach(function (b) {
+        b.classList.toggle('active', b.dataset.mode === state.notifyMode);
+      });
+      setNotifyText('default');
+    });
   });
 
   $('forceSlider').addEventListener('input', function () {
@@ -1668,7 +1817,7 @@
   });
 
   /* Init */
-  renderTopicSelect();
+  renderTopicPills();
   loadTopicUI();
   updateClock();
   setInterval(updateClock, 30000);
