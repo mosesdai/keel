@@ -18,6 +18,28 @@
 
 ---
 
+## [2026-07-10] 第 7 轮 · Railway staging 上线验收
+
+- **本轮目标**：Moses Railway 部署成功后公网 curl 验收，更新部署/状态文档并 push。
+
+- **本轮做了什么**：
+  - curl `GET /health` → **200**，`status":"ok"`；`api_key_configured":false`。
+  - curl `POST /v1/entry`（topic `tencent-ali-renewal`）→ **503**，`服务端未配置 KEEL_API_KEY`。
+  - 更新 `track-a/deploy/DEPLOYMENT_STATUS.md`、`MOSES_STATUS.md`、`RESUME.md`；新增 `track-a/shortcuts/KEEL_URL.txt`；`SETUP.md` 写入 staging entry URL。
+  - 说明 GitHub Variable **`KEEL_STAGING_URL`** = `https://keel-production-be1c.up.railway.app`（无尾斜杠）。
+
+- **本轮结论**：
+  - **Railway ✅**：API 进程与域名可达；Moses 可关机，push `main` 继续自动部署。
+  - **P0 余留**：Railway Variables 补 **`KEEL_API_KEY`**（+ 确认 `DEEPSEEK_API_KEY`、`DEFAULT_PROVIDER=deepseek`）→ Redeploy → 再验 entry。
+
+- **下次从这里继续**：
+  1. Moses（可选 2 分钟）：Railway 补 `KEEL_API_KEY` + Redeploy；GitHub Variable `KEEL_STAGING_URL`。
+  2. Agent：entry smoke 通过后更新 `DEPLOYMENT_STATUS.md`；推进 `issues/002` 九叔 Bridge。
+  3. 九叔：`track-a/shortcuts/SETUP.md` + `KEEL_URL.txt` 装快捷指令真机试。
+
+
+---
+
 ## [2026-07-04] 第 1 轮 · 从零到 Track A 可演示
 
 - **本轮目标**：完成军师 app 调研与拍板，落地 7/15 前过渡方案（Track A），让 Moses 能本地跑通并「看见」产品体验。

@@ -9,21 +9,19 @@
 
 | 优先级 | 事项 | 状态 | 怎么做 |
 |--------|------|------|--------|
-| **P0** | Railway API 24/7 | ⏳ **待做** | 见下方 **2 步** |
-| P1 | `KEEL_STAGING_URL` | ⏳ Railway 有域名后 | GitHub → Settings → Variables → 填 `https://….up.railway.app`（无尾斜杠） |
+| **P0** | Railway API 24/7 | ✅ **已部署** | `https://keel-production-be1c.up.railway.app/health` ok；**待补** Railway Variable `KEEL_API_KEY` 后 Redeploy，`/v1/entry` 才可用 |
+| P1 | `KEEL_STAGING_URL` | ⏳ **待填** | GitHub → Settings → Variables → Actions → **`https://keel-production-be1c.up.railway.app`**（无尾斜杠） |
 | P2 | 创建 agent issues | 可选 | 从 `issues/002`–`004` 粘贴到 GitHub New Issue |
 | — | GitHub Secrets | ✅ 已完成 | `KEEL_API_KEY`、`DEEPSEEK_API_KEY` |
 
-### Railway 若仍未成功：只需 2 步（约 10 分钟）
+### Railway ✅（2026-07-10）— 还差一步让 entry 可用
 
-这是 **API 24/7 在线** 的前提；做完可关机，push `main` 会自动部署。
+- **公网**：`https://keel-production-be1c.up.railway.app` · `/health` → **200 ok**
+- **阻塞**：health 显示 `api_key_configured: false` → Railway **Variables** 添加 **`KEEL_API_KEY`**（与 GitHub Secret 同值）→ **Redeploy**
+- **九叔快捷指令 URL**：`https://keel-production-be1c.up.railway.app/v1/entry`（见 `track-a/shortcuts/KEEL_URL.txt`）
 
-1. **Root Directory** — Railway → 你的 Service → **Settings** → **Root Directory** 填：**`track-a`** → Save  
-2. **Redeploy** — 同一页或 **Deployments** → **Redeploy**（或 push 任意 `track-a/` 变更到 `main`）
-
-然后确认 Variables 已有 `KEEL_API_KEY`、`DEEPSEEK_API_KEY`、`DEFAULT_PROVIDER=deepseek`，并 **Generate Domain**，浏览器打开 `https://你的域名/health` 应返回 ok。
-
-详细图文：[`RAILWAY_傻瓜版.md`](./RAILWAY_傻瓜版.md) · 验收：[`track-a/deploy/RAILWAY_STAGING_CHECKLIST.md`](./track-a/deploy/RAILWAY_STAGING_CHECKLIST.md)
+Moses 可关机；补 key 后 agent 再 curl `POST /v1/entry` 验收。  
+详细：[`track-a/deploy/DEPLOYMENT_STATUS.md`](./track-a/deploy/DEPLOYMENT_STATUS.md) · [`RAILWAY_傻瓜版.md`](./RAILWAY_傻瓜版.md)
 
 ---
 
@@ -58,7 +56,7 @@
 3. **Commit 历史** — https://github.com/mosesdai/keel/commits/main  
    - 文档、workflow、demo 持续更新；`SESSION_LOG.md` 有 handoff  
 
-Railway 配好后第 4 点：`/health` 公网 ok + `track-a/deploy/DEPLOYMENT_STATUS.md` 有 URL。
+第 4 点（✅）：`/health` 公网 ok + `track-a/deploy/DEPLOYMENT_STATUS.md` 已记录 staging URL。
 
 ---
 
@@ -78,7 +76,7 @@ git branch -u origin/main main
 |-----|----------|
 | Railway 刚配好 | `issues/002-S1-bridge-jiushu.md` — 九叔 Bridge Track |
 | 想先改 demo 体验 | `issues/004-demo-from-research05.md` |
-| Railway 仍阻塞 | 先完成上方 2 步，再开 `002` |
+| entry 仍 503 | Railway 补 `KEEL_API_KEY` + Redeploy，再开 `002` |
 
 ---
 

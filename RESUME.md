@@ -3,6 +3,8 @@
 > 工作区：`/Users/Eliam-Code/20260701 军师 app/`  
 > 最后更新：2026-07-10（主线 = GitHub 自主开发）
 
+**Railway staging ✅**（2026-07-10）：`https://keel-production-be1c.up.railway.app` — `/health` ok；Railway 需补 `KEEL_API_KEY` 后 `/v1/entry` 可用。详见 `track-a/deploy/DEPLOYMENT_STATUS.md`。
+
 ---
 
 ## ★ 关机前 / 回归先看（Moses）
@@ -51,7 +53,7 @@ uvicorn app:app --host 0.0.0.0 --port 8787 --reload
 | | `NAMING.md` | 外显名 主见/Keel 与 discreet 规范 |
 | | `TEAM.md` | 角色分工与沉淀机制 |
 | | `track-a/README.md` | Track A 目录地图 |
-| | `track-a/deploy/RAILWAY_WALKTHROUGH.md` | Railway 逐步部署（当前阻塞项） |
+| | `track-a/deploy/DEPLOYMENT_STATUS.md` | **Staging URL** 与 curl 验收记录 |
 | | `track-a/deploy/DEEPSEEK_SETUP.md` | DeepSeek key 配置 |
 | | `track-a/server/README.md` | 后端接口与本地启动 |
 | | `track-a/shortcuts/SETUP.md` | iPhone 快捷指令搭建 |

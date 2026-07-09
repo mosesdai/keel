@@ -4,10 +4,11 @@
 
 | 字段 | 值 |
 |------|-----|
-| **Staging URL** | _（待填，例 `https://xxx.up.railway.app`）_ |
-| **Railway 项目** | _（可选，项目名）_ |
+| **Staging URL** | `https://keel-production-be1c.up.railway.app`（Port 8080，Railway 反代） |
+| **Railway 项目** | keel-production（Moses 部署） |
 | **Root Directory** | `track-a` |
-| **最后 `/health` 检查** | _（日期 + ok/fail，由 agent 或 Moses 填）_ |
-| **KEEL_STAGING_URL（GitHub Variable）** | _（已填 / 未填）_ |
-| **备注** | Railway GitHub 集成完成后，`main` push 触发自动部署 |
+| **最后 `/health` 检查** | **2026-07-10 07:01 JST** — **ok** HTTP 200，`status":"ok"`；`api_key_configured":false`（服务端未读到 `KEEL_API_KEY`） |
+| **最后 `/v1/entry` 检查** | **2026-07-10 07:01 JST** — **fail** HTTP 503，`服务端未配置 KEEL_API_KEY`（Railway Variables 需补 `KEEL_API_KEY` 并 Redeploy） |
+| **KEEL_STAGING_URL（GitHub Variable）** | **待填** → 应填 `https://keel-production-be1c.up.railway.app`（**无尾斜杠**，非 `/v1/entry`） |
+| **备注** | Railway GitHub 集成完成后，`main` push 触发自动部署；九叔快捷指令 POST URL 见 `track-a/shortcuts/KEEL_URL.txt` |
 

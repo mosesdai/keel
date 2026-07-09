@@ -6,8 +6,8 @@
 
 ## 0) 先准备两个占位符
 
-- `{{KEEL_API_URL}}`：例如 `https://xxx.up.railway.app/v1/entry`
-- `{{KEEL_API_KEY}}`：和后端 `KEEL_API_KEY` 完全一致
+- `{{KEEL_API_URL}}`：**Staging（Railway）** → `https://keel-production-be1c.up.railway.app/v1/entry`（亦见同目录 [`KEEL_URL.txt`](./KEEL_URL.txt)）
+- `{{KEEL_API_KEY}}`：和后端 `KEEL_API_KEY` 完全一致（勿写进 repo）
 
 ---
 

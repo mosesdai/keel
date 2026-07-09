@@ -1,0 +1,9 @@
+# 九叔 iPhone 快捷指令 — API 根路径（勿提交真实 API key）
+# 在「获取 URL 内容」动作的 URL 字段粘贴下一行：
+
+KEEL_API_URL=https://keel-production-be1c.up.railway.app/v1/entry
+
+# GitHub repo Variable（Settings → Secrets and variables → Actions → Variables）：
+# KEEL_STAGING_URL=https://keel-production-be1c.up.railway.app
+# （无尾斜杠；供 CI/文档引用，与快捷指令 entry 路径不同）
+
