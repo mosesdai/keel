@@ -1,7 +1,7 @@
 # 下次入口指南 · 军师 app / 主见 Keel
 
 > 工作区：`/Users/Eliam-Code/20260701 军师 app/`  
-> 最后更新：2026-07-09
+> 最后更新：2026-07-09（GitHub push ✅）
 
 ---
 
@@ -52,6 +52,15 @@ uvicorn app:app --host 0.0.0.0 --port 8787 --reload
 | ★ | `PLAYBOOK.md` | 云上自主开发阶段与门禁 |
 | ★ | `GITHUB_SETUP.md` | GitHub/Railway/Apple 一次性设置 |
 | ★ | `ROADMAP.md` | 日期里程碑与分发路径 |
+
+---
+
+## GitHub（remote）
+
+- **仓库**：https://github.com/mosesdai/keel  
+- **Remote**：`origin` → `https://github.com/mosesdai/keel.git`  
+- **状态**：`main` 已 push 并跟踪 `origin/main`（2026-07-09）  
+- **Secrets / Railway**：见根目录 `GITHUB_SECRETS.md`；S0 任务见 `issues/001-S0-railway-bridge.md`
 
 ---
 
