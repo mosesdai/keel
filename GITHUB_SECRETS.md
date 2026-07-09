@@ -1,5 +1,7 @@
 # GitHub Actions Secrets（mosesdai/keel）
 
+> **不懂请看** [`GITHUB_SECRETS_傻瓜版.md`](./GITHUB_SECRETS_傻瓜版.md)
+
 > **填写位置**：https://github.com/mosesdai/keel → **Settings** → **Secrets and variables** → **Actions** → **New repository secret**  
 > **原则**：只在本文件列**名称与说明**；**值永远不要**提交进 git 或粘贴到 Cursor 聊天。
 

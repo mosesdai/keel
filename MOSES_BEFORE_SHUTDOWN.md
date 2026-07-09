@@ -1,5 +1,7 @@
 # Moses 关机前必做清单（复制即用）
 
+> **不懂 GitHub Secrets 怎么填？请看** [`GITHUB_SECRETS_傻瓜版.md`](./GITHUB_SECRETS_傻瓜版.md)
+
 > **仓库**：https://github.com/mosesdai/keel  
 > **工作区**：`/Users/Eliam-Code/20260701 军师 app/`  
 > **目标**：做完下面「关机前必须做」（约 **15–20 分钟**）即可关电脑；之后在 GitHub / 云上由 agent 继续开发，**只有决策门禁**才再叫醒你。
