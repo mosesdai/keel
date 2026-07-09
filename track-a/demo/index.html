@@ -951,6 +951,101 @@
       border-radius: 0 0 2px 2px;
     }
 
+    .stage-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
+      max-width: var(--phone-w);
+    }
+
+    .mac-bar-mock {
+      width: 100%;
+      max-width: var(--phone-w);
+      padding: 8px 14px;
+      background: rgba(24,27,32,.92);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: var(--shadow-card);
+    }
+
+    .mac-bar-mock strong { color: var(--accent); font-weight: 500; }
+
+    .prompt-chips {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      justify-content: center;
+    }
+
+    .prompt-chip {
+      padding: 6px 12px;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+    }
+
+    .prompt-chip:hover { border-color: rgba(196,165,116,.3); color: var(--text); }
+
+    .confirm-card {
+      display: none;
+      margin-top: 8px;
+      padding: 14px;
+      background: var(--surface);
+      border: 1px solid rgba(196,165,116,.25);
+      border-radius: var(--radius);
+    }
+
+    .confirm-card.visible { display: block; }
+
+    .confirm-q { font-size: 14px; line-height: 1.5; margin-bottom: 12px; }
+
+    .confirm-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .reply-section { margin-bottom: 12px; }
+    .reply-section-label {
+      font-size: 10px;
+      letter-spacing: .08em;
+      color: var(--accent);
+      margin-bottom: 4px;
+      text-transform: uppercase;
+    }
+
+    .error-demo-bar {
+      margin: 0 16px;
+      padding: 10px 12px;
+      background: rgba(201,106,90,.06);
+      border: 1px dashed rgba(201,106,90,.25);
+      border-radius: 10px;
+      font-size: 11px;
+      color: var(--text-muted);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .error-demo-bar button {
+      font-size: 10px;
+      padding: 4px 8px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text-muted);
+      cursor: pointer;
+      font-family: inherit;
+    }
+
     footer.demo-footer {
       margin-top: 16px;
       font-size: 11px;
@@ -1070,6 +1165,12 @@
 <body>
   <p class="stage-label">产品体验预览 · 本地演示</p>
 
+  <div class="stage-wrap">
+  <div class="mac-bar-mock" aria-label="Mac 菜单栏示意">
+    <span><strong>主见</strong> · Keel</span>
+    <span>待复盘 1 · 本机记录</span>
+  </div>
+
   <div class="phone" role="application" aria-label="主见 Keel 演示">
     <div class="notch" aria-hidden="true"></div>
     <div class="status-bar">
@@ -1104,6 +1205,11 @@
           <button type="button" class="notify-mode-btn" data-mode="stealth">隐身模式</button>
         </div>
       </div>
+    </div>
+
+    <div class="error-demo-bar" id="errorDemoBar">
+      <span id="errorDemoText">错误态预览：转写或 API 失败时的文案</span>
+      <button type="button" id="errorDemoBtn">演示低置信度</button>
     </div>
 
     <div class="force-bar" id="forceBar" aria-label="力谏强度">
@@ -1147,7 +1253,20 @@
               <span class="section-label-hint">编辑后提交</span>
             </div>
             <textarea class="transcript-box" id="transcript" rows="4"
-              placeholder="语音转写后在此确认，或直接输入你的判断…"></textarea>
+              placeholder="说一句正在卡住你的事。10 秒也够。"></textarea>
+          </div>
+          <div class="prompt-chips" role="group" aria-label="快捷提示">
+            <button type="button" class="prompt-chip" data-prompt="这事该不该推进？">该不该推进？</button>
+            <button type="button" class="prompt-chip" data-prompt="我是不是在自欺？">我是不是在自欺？</button>
+            <button type="button" class="prompt-chip" data-prompt="怎么跟他开口？">怎么跟他开口？</button>
+          </div>
+          <div class="confirm-card" id="confirmCard">
+            <div class="confirm-q" id="confirmQuestion">我理解你要判断的是：…</div>
+            <div class="confirm-actions">
+              <button type="button" class="btn btn-primary" id="confirmYes">对，直接答</button>
+              <button type="button" class="btn" id="confirmEdit">改一下</button>
+              <button type="button" class="btn" id="confirmCancel">取消</button>
+            </div>
           </div>
           <div class="hold-btn-wrap">
             <button type="button" class="hold-btn" id="holdBtn" aria-label="按住说话">
@@ -1207,14 +1326,15 @@
       </button>
     </nav>
   </div>
+  </div>
 
-  <footer class="demo-footer">过渡版 · 7/15 交付</footer>
+  <footer class="demo-footer">过渡版 · 7/15 交付 · research/05</footer>
 
   <div class="modal-overlay" id="settingsModal" role="dialog" aria-labelledby="settingsTitle">
     <div class="modal">
       <h3 id="settingsTitle">Live 模式</h3>
       <label for="apiBase">API 地址</label>
-      <input type="url" id="apiBase" value="http://127.0.0.1:8787">
+      <input type="url" id="apiBase" value="https://keel-production-be1c.up.railway.app">
       <label for="apiKey">KEEL_API_KEY（与 server/.env 一致）</label>
       <input type="password" id="apiKey" placeholder="留空则使用内置演示数据">
       <div class="modal-actions">
@@ -1249,7 +1369,7 @@
     { level: 5, name: '呛人', short: '呛人 · 5', color: '#c96a5a' }
   ];
 
-  var SAMPLE_REPLY_TENCENT = '你选择谨慎观察、暂不表态——大方向没错。但我得直说一个风险：在双方都已释放接触信号的语境里，「观望」不是中立，沉默会被读成可拉拢。\n\n如果你错了，最可能错在这：把「信息不足」拖成了「筹码不足」。等声明落地再表态，议价窗口可能已经关了一半。\n\n三点值得你本周内盯死：\n① 双方公开合作声明的时间差（谁先释信号，谁在下通牒）；\n② 独家版权比例是否松动（这是价码，不是细节）；\n③ 监管对平台版权集中度的后续动作。\n\n常规打法：维持中性，等下一轮披露。但有个更激进的想法——主动约一方私下摸底，用「若续约顺利可探讨互补领域合作」换独家比例区间，把观望变成有结构的试探。\n\n这是我的担心，怎么定你说了算。';
+  var SAMPLE_REPLY_TENCENT = '【主见】你选择谨慎观察、暂不表态——大方向没错，但「观望」在双方已释信号的语境里会被读成可拉拢。\n\n【为什么】\n① 若错，最可能把「信息不足」拖成「筹码不足」；\n② 独家版权比例松动是价码，不是细节；\n③ 监管对平台版权集中度仍有后续动作。\n\n【下一步】\n常规：维持中性等披露。激进：主动约一方私下摸底，用互补合作换独家比例区间，把观望变成结构化试探。\n\n这是我的担心，怎么定你说了算。';
 
   var MOCK_HISTORY = [
     {
@@ -1341,7 +1461,7 @@
   var state = {
     topic: 'tencent-ali-renewal',
     live: false,
-    apiBase: localStorage.getItem('keel_api_base') || 'http://127.0.0.1:8787',
+    apiBase: localStorage.getItem('keel_api_base') || 'https://keel-production-be1c.up.railway.app',
     apiKey: localStorage.getItem('keel_api_key') || '',
     submitting: false,
     forceLevel: 3,
@@ -1370,9 +1490,38 @@
   }
 
   function formatReplyHtml(text) {
+    var sections = [];
+    var re = /【(主见|为什么|下一步)】/g;
+    var parts = text.split(re);
+    if (parts.length > 1) {
+      for (var i = 1; i < parts.length; i += 2) {
+        var label = parts[i];
+        var body = (parts[i + 1] || '').trim();
+        sections.push('<div class="reply-section"><div class="reply-section-label">' + label + '</div><p>' +
+          body.replace(/\n/g, '<br>') + '</p></div>');
+      }
+      return sections.join('');
+    }
     return text.split('\n\n').map(function (p) {
       return '<p>' + p.replace(/\n/g, '<br>') + '</p>';
     }).join('');
+  }
+
+  function inferConfirmQuestion(text) {
+    var t = text.trim().slice(0, 80);
+    if (t.length < 8) return '你要我帮你看清的是哪件事？';
+    return '我理解你要判断的是：「' + t + (text.length > 80 ? '…' : '') + '」';
+  }
+
+  function showConfirmCard() {
+    var text = $('transcript').value.trim();
+    if (!text) { $('transcript').focus(); return; }
+    $('confirmQuestion').textContent = inferConfirmQuestion(text);
+    $('confirmCard').classList.add('visible');
+  }
+
+  function hideConfirmCard() {
+    $('confirmCard').classList.remove('visible');
   }
 
   function setForceLevel(level) {
@@ -1791,7 +1940,31 @@
 
   $('transcript').addEventListener('input', updateTranscriptState);
 
-  $('submitBtn').addEventListener('click', submitEntry);
+  $('submitBtn').addEventListener('click', showConfirmCard);
+
+  $('confirmYes').addEventListener('click', function () {
+    hideConfirmCard();
+    submitEntry();
+  });
+  $('confirmEdit').addEventListener('click', function () {
+    hideConfirmCard();
+    $('transcript').focus();
+  });
+  $('confirmCancel').addEventListener('click', hideConfirmCard);
+
+  document.querySelectorAll('.prompt-chip').forEach(function (chip) {
+    chip.addEventListener('click', function () {
+      $('transcript').value = chip.dataset.prompt;
+      updateTranscriptState();
+    });
+  });
+
+  $('errorDemoBtn').addEventListener('click', function () {
+    $('errorDemoText').textContent = '这句我没听准。你可以重说，或直接改这 12 个字。';
+    $('transcript').value = '腾讯阿里版权…（听不清）';
+    $('transcript').focus();
+    updateTranscriptState();
+  });
 
   $('settingsBtn').addEventListener('click', function () {
     $('apiBase').value = state.apiBase;

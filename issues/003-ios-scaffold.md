@@ -16,9 +16,9 @@
 
 ### A. 项目结构（agent）
 
-- [ ] 创建 `ios/Keel/` SwiftUI app 骨架（或 Xcode project + README 说明生成步骤）
-- [ ] 更新 `ios/README.md`：Bundle ID 占位、scheme 名、最低 iOS 版本
-- [ ] 首屏占位：语音入口、topic 选择、立场卡片、历史列表（空状态即可）
+- [x] 创建 `ios/Keel/` SwiftUI app 骨架 + [`ios/Keel/README.md`](../ios/Keel/README.md)（Xcode 打开步骤）
+- [x] 更新 `ios/README.md`：staging URL、目录、Tab 结构
+- [x] 首屏占位：说 tab（topic pills、prompt chips、提交按钮）；立场/历史/日志 `ContentUnavailableView`
 - [ ] 本地持久化预留（SwiftData / Core Data 二选一，文档说明）
 
 ### B. CI（agent）
