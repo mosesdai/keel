@@ -129,6 +129,7 @@ Moses 关机后，工程在 **GitHub + CI + Railway** 上继续推进；只有 `
 
 ## 10. 相关文件
 
+- [`CURSOR_CLOUD_AGENT_SETUP.md`](./CURSOR_CLOUD_AGENT_SETUP.md) — Cursor Cloud Agent 绑定 GitHub issue 设置指南
 - [`CLOUD_DEV.md`](./CLOUD_DEV.md) — Actions 设计、Secrets 分层  
 - [`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md) — 关机前清单  
 - [`MOSES_STATUS.md`](./MOSES_STATUS.md) — Moses 一页纸状态  
