@@ -1,4 +1,5 @@
-# Used when Service Root Directory = track-a (recommended).
+# Used when Service Root Directory is repo root (not track-a).
+# Prefer Settings → Root Directory = track-a and track-a/railway.toml.
 [build]
 builder = "DOCKERFILE"
 dockerfilePath = "Dockerfile"
