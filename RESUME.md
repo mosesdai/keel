@@ -5,6 +5,12 @@
 
 ---
 
+## ★ 关机前先看（Moses）
+
+**[`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md)** — 约 15–20 分钟做完即可关电脑；agent 在 GitHub/云上继续，仅决策门禁再叫醒你。
+
+---
+
 ## 一句话
 
 给 NBA China 商业侧 CEO **九叔**的私人 AI 幕僚——外显名 **主见 / Keel**，对内人格 **军师**；7/15 前用 Track A（快捷指令 + 轻后端）过渡，目标是让他脱离 Cursor、敢说真话、得到有力度且不冒犯的建议。

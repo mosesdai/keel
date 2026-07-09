@@ -210,6 +210,42 @@ Moses 只做：
 
 ---
 
+---
+
+## 6b. Moses 关机后 agent 自主推进 SOP
+
+Moses 按 [`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md) 完成 GitHub Secrets + Railway 后即可关机。此后 agent 在本仓库与 GitHub 上按本 SOP 循环，**不**为普通工程事项打断 Moses。
+
+### 每轮启动（读序）
+
+1. [`MOSES_BEFORE_SHUTDOWN.md`](./MOSES_BEFORE_SHUTDOWN.md) — 确认 Railway / URL 是否已就绪
+2. [`SESSION_LOG.md`](./SESSION_LOG.md) + [`RESUME.md`](./RESUME.md)
+3. GitHub open issues（优先 `issues/001-S0-railway-bridge.md` 或线上 #1）
+4. [`GITHUB_STATUS.md`](./GITHUB_STATUS.md) — CI / Remote 状态
+
+### 自主循环
+
+1. **读 issue** — 对齐阶段 S0/S1、DoD、是否触发 [`PLAYBOOK.md`](./PLAYBOOK.md) 决策门禁
+2. **开分支 → 改代码/文档 → PR** — PR 模板含 Acceptance；同步 `SESSION_LOG.md`
+3. **Push / 合并** — 仅当 CI 绿且无未决门禁；Moses 未在线时 agent 可在无门禁 PR 上合并（若仓库策略允许）或留 PR 待合并，**继续**非阻塞 issue
+4. **部署**
+   - **Railway 已连 GitHub**（Root `track-a`）：`main` 合并 → Railway **自动**构建部署；无需 Moses 本机
+   - **仅有** `RAILWAY_TOKEN`：`deploy-server.yml` 在 `main` 上触发 CLI 部署
+   - **两者皆无**：只 push 代码；在 PR/issue 注明「待 Moses 完成 Railway 步骤 2」，**不**假装 staging 已上线
+5. **验证** — 若存在 `KEEL_STAGING_URL` 或 [`track-a/deploy/DEPLOYMENT_STATUS.md`](./track-a/deploy/DEPLOYMENT_STATUS.md) 中的 URL：打 `/health`，并推进 `QUALITY_TESTS.md` 对 staging 的自动化草稿
+6. **门禁** — 命中 PLAYBOOK §5 时：暂停该 PR，在 issue/PR 写清「需要 Moses 决策：…」，**其他** issue 继续
+
+### 明确不做（需 Moses 或 Railway Dashboard）
+
+- 登录 Railway / GitHub 替 Moses 创建 Secrets 的值
+- 替九叔手机安装快捷指令或首次真机验收（除非 Moses 事后授权远程指导流程）
+
+### 产物
+
+每轮至少更新：`SESSION_LOG.md`；里程碑变化时更新 `ROADMAP.md` / `GITHUB_STATUS.md`；部署变化时更新 `track-a/deploy/DEPLOYMENT_STATUS.md`（不写 key）。
+
+---
+
 ## 7. 后端部署策略
 
 7/15 前：
