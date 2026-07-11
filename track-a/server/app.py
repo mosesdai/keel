@@ -235,9 +235,15 @@ def detect_contradiction_hint(new_text: str, living_position: str) -> bool:
 
 
 def route_model(
-    raw_text: str, topic: dict[str, Any], topic_mark: Optional[str], entry_depth: Optional[str]
+    raw_text: str,
+    topic: dict[str, Any],
+    topic_mark: Optional[str],
+    entry_depth: Optional[str],
+    advice_intensity: int = 3,
+    contradiction_hint: bool = False,
 ) -> tuple[str, str, bool]:
-    # 路由原则：默认走最便宜可用 DeepSeek；仅深度请求才升档
+    # 路由原则：日常走便宜的 deepseek-chat；关键才升到 deepseek-reasoner。
+    # 升档触发（决策 4/5 档深度通道）：/max、深度标记、advice_intensity≥4、检测到立场矛盾、或话题本身深度。
     has_deepseek = bool(os.getenv("DEEPSEEK_API_KEY"))
     has_qwen = bool(os.getenv("DASHSCOPE_API_KEY"))
 
@@ -255,7 +261,16 @@ def route_model(
     depth_by_mark = (topic_mark or "").strip().lower() in {"深度", "deep"}
     depth_by_entry = (entry_depth or "").strip().lower() == "deep"
     depth_by_topic = bool(topic.get("depth_mode")) or topic["slug"] in deep_topics
-    is_depth = depth_by_text or depth_by_mark or depth_by_entry or depth_by_topic
+    depth_by_intensity = advice_intensity >= 4
+    depth_by_contradiction = bool(contradiction_hint)
+    is_depth = (
+        depth_by_text
+        or depth_by_mark
+        or depth_by_entry
+        or depth_by_topic
+        or depth_by_intensity
+        or depth_by_contradiction
+    )
 
     if is_depth:
         if has_deepseek:
@@ -272,11 +287,11 @@ def route_model(
 
 
 INTENSITY_HINTS: dict[int, str] = {
-    1: "力谏强度 1/5（平和）：以倾听和澄清为主，少反驳，语气柔软。",
-    2: "力谏强度 2/5（轻扶）：温和提醒风险，不强行对抗。",
-    3: "力谏强度 3/5（常态）：平衡树洞与诤友，常规反对意见。",
-    4: "力谏强度 4/5（直谏）：直言风险与反对，不回避冲突。",
-    5: "力谏强度 5/5（呛人）：最高诚意、最强反对，措辞可更尖锐但仍不冒犯。",
+    1: "当前力谏强度 1/5（只听）：他在宣泄/疲惫，以倾听和澄清为主，当天不进言；但【硬反对】【disruptive】仍要写进回复的对应块，标注为'先记下，等你想认真判断时我们再谈'，不要凭空消失。",
+    2: "当前力谏强度 2/5（轻扶）：以梳理为主，只轻点明显事实错误；硬反对与 disruptive 收敛为'先记下'的一句，但不省略。",
+    3: "当前力谏强度 3/5（常态）：正常参谋，事实与判断分开，硬反对与 disruptive 各至少 1 条，落到具体机制。",
+    4: "当前力谏强度 4/5（直谏）：主动挑战，证据不足即点破，给可验证检验方法，硬反对加码到 2 条以上。",
+    5: "当前力谏强度 5/5（最高诚意）：穷尽反证、最坏情况推演、多条 disruptive；内容最锋利，语气仍冷静克制、不羞辱。",
 }
 
 
@@ -294,7 +309,9 @@ def compose_system_prompt(
         f"{charter_text}\n\n"
         f"{intensity_rule}\n"
         f"{hint_rule}\n"
-        "回复要有力度、不迎合；允许较长、结构化推演。仅返回 JSON，不要多余文本。"
+        "回复要有力度、不迎合、深刻优先。宁可尖锐得让他一愣，也不要四平八稳地滑过去。"
+        "reply 字段里【看见】【主见】【硬反对】【disruptive】四个硬核块必须齐全且有实质内容。"
+        "仅返回 JSON，不要多余文本，不要 Markdown 代码围栏。"
     )
 
 
@@ -306,36 +323,70 @@ def require_api_key(x_api_key: Optional[str] = Header(default=None, alias="X-API
         raise HTTPException(status_code=401, detail="X-API-Key 无效")
 
 
+def format_recent_entries(recent_entries: list[dict[str, Any]], limit: int = 6) -> str:
+    if not recent_entries:
+        return "（暂无历史 entry，这是该话题的早期输入。）"
+    lines: list[str] = []
+    for item in recent_entries[:limit]:
+        ts = str(item.get("timestamp", ""))[:16].replace("T", " ")
+        raw = str(item.get("raw_text", "")).strip().replace("\n", " ")
+        if len(raw) > 120:
+            raw = raw[:120] + "…"
+        shift = str(item.get("reason_for_shift", "")).strip().replace("\n", " ")
+        if len(shift) > 120:
+            shift = shift[:120] + "…"
+        intensity = item.get("advice_intensity", "-")
+        line = f"- [{ts} · 力谏{intensity}] 他说：{raw}"
+        if shift:
+            line += f"\n  └ 当时军师判断转变：{shift}"
+        lines.append(line)
+    return "\n".join(lines)
+
+
 def compose_user_prompt(
-    topic: dict[str, Any], raw_text: str, living_position: str, contradiction_hint: bool
+    topic: dict[str, Any],
+    raw_text: str,
+    living_position: str,
+    contradiction_hint: bool,
+    recent_entries: Optional[list[dict[str, Any]]] = None,
 ) -> str:
     hint_note = (
         "关键词辅助：可能检测到立场张力（仅供参考，以你的对照分析为准）。"
         if contradiction_hint
         else "关键词辅助：未检测到明显极性反转（仍须你独立对照旧立场书判断）。"
     )
+    recent_block = format_recent_entries(recent_entries or [])
     return f"""
 当前主题：
 - slug: {topic["slug"]}
 - 展示名: {topic.get("display_name", topic["slug"])}
 
-当前立场书（旧）：
+当前立场书（旧·权威真相源，每轮先整体读它，不靠你的记忆）：
 {living_position}
+
+最近几条 entry（从近到远，用来看他的思路怎么走、在哪反复横跳）：
+{recent_block}
 
 新输入（已人工确认）：
 {raw_text}
 
 {hint_note}
 
-【镜子任务】把「当前立场书（旧）」和「新输入」一起读，判断是延续还是转变。
-在 reason_for_shift 中解释：哪些证据/假设变了？是情绪态反转还是理性修正？仍有哪些不确定性？
+【镜子任务】把「当前立场书（旧）」「最近几条 entry」「新输入」三者一起读，判断新输入相对旧立场是延续、修正、还是无触发的矛盾。
+在 reason_for_shift 中解释：哪些证据/假设变了？是情绪态反转还是理性修正？他是不是在某个点上反复横跳（若是，指出真正的根本张力可能不是表面那个）？仍有哪些不确定性？
 
-请输出 JSON，字段必须完整：
+【立场书更新规矩·关键】living_position_update 不是把他的话摘要复述一遍，而是"立场的演变"：
+- 立场书会变、快照不可变——立场书写"他现在怎么想"，要能看出相对上一版动了什么。
+- 必须保留一个"未决张力"小节：他自己还没想清、或情绪态下产生、待冷静复核的点，不要因为这轮就抹平。
+- 必须保留一个"军师留着的硬反对/盲点"小节，跨轮累积，不要每轮清空。
+- 在关键理由/张力里带上人物与议题关键字（如具体谈判对象、合约节点、财报时点），方便日后跨时间检索。
+
+请输出 JSON，字段必须完整（reply 用 Markdown，含【看见】【主见】【硬反对】【disruptive】【镜子/盲点】【下一步】，篇幅按需、通常 400~900 字，深刻优先，不为凑格式注水）：
 {{
-  "reply": "给主人的结构化回复（Markdown，200~600字，含主见/反对意见/disruptive备选/下一步）",
-  "living_position_update": "更新后的当前立场书（Markdown，150~400字）",
-  "daily_snapshot": "今日快照追加片段（Markdown，100~250字）",
-  "reason_for_shift": "对照旧立场书解释：延续还是转变，为什么（80~200字）",
+  "reply": "给主人的结构化回复（Markdown）",
+  "living_position_update": "更新后的立场书（Markdown，含'当前主张''关键理由（带来源级别）''未决张力''军师留着的硬反对/盲点''本轮相对上一版变了什么'）",
+  "daily_snapshot": "今日快照追加片段（Markdown，不可变截面，标题=当天关键词）",
+  "reason_for_shift": "对照旧立场书+最近entry解释：延续/修正/无触发矛盾，为什么",
   "tension_detected": true或false
 }}
 """
@@ -457,6 +508,73 @@ def mock_output(raw_text: str, contradiction_hint: bool) -> dict[str, str]:
         "reason_for_shift": reason,
         "tension_detected": contradiction_hint,
     }
+
+
+def assess_quality(reply: str) -> list[str]:
+    """质量闸门：检查硬核块是否在场且有实质内容。返回缺失块列表。"""
+    gaps: list[str] = []
+    text = reply or ""
+    low = text.lower()
+
+    has_hard_objection = ("硬反对" in text) or ("反对意见" in text) or ("你若错" in text)
+    has_disruptive = (
+        "disruptive" in low
+        or "激进" in text
+        or "换个" in text
+        or "另一种打法" in text
+        or "非线性" in text
+    )
+    if not has_hard_objection:
+        gaps.append("hard_objection")
+    if not has_disruptive:
+        gaps.append("disruptive")
+    # 过短基本不可能达到"启发/害怕"标准
+    if len(text.strip()) < 180:
+        gaps.append("too_short")
+    return gaps
+
+
+def quality_followup(
+    provider: str,
+    model: str,
+    system_prompt: str,
+    original_user_prompt: str,
+    prior_reply: str,
+    gaps: list[str],
+) -> Optional[dict[str, Any]]:
+    """检测到硬核块缺失时补一轮短追问，让模型重写补齐。失败返回 None。"""
+    gap_names = {
+        "hard_objection": "【硬反对】（至少1条'你若错最可能错在哪'，落到这件事的具体机制，不给通用免责）",
+        "disruptive": "【disruptive】（至少1条改生意结构的激进备选，说清赢在哪、代价是什么）",
+        "too_short": "回复过短、深度不足（请展开到能真正给出启发的量级）",
+    }
+    missing = "、".join(gap_names.get(g, g) for g in gaps)
+    followup_user = (
+        original_user_prompt
+        + "\n\n【质量闸门·追问】你上一版回复不达标，缺少或过弱：" + missing
+        + "\n请重写并只返回同样 schema 的 JSON：补齐缺失的硬核块，保留原有有价值的内容，"
+        "reply 必须同时含【看见】【主见】【硬反对】【disruptive】【镜子/盲点】【下一步】。"
+        f"\n\n你的上一版 reply（供参考，不要照抄，要补强）：\n{prior_reply}"
+    )
+    messages = [
+        {"role": "system", "content": system_prompt},
+        {"role": "user", "content": followup_user},
+    ]
+    try:
+        if provider == "deepseek":
+            content = deepseek_chat(messages, model)
+        elif provider == "qwen":
+            content = qwen_chat(messages, model)
+        else:
+            return None
+    except ModelCallError:
+        return None
+    except Exception:  # noqa: BLE001
+        return None
+    parsed = extract_json_payload(content)
+    if parsed and str(parsed.get("reply", "")).strip():
+        return parsed
+    return None
 
 
 def call_model(
@@ -621,11 +739,21 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
     living_path = TOPICS_DIR / topic_slug / "living_position.md"
     living_before = living_path.read_text(encoding="utf-8")
     contradiction_hint = detect_contradiction_hint(payload.raw_text, living_before)
+    recent_entries = load_recent_entries(topic_slug, limit=8)
 
-    provider, model, routed_deep = route_model(payload.raw_text, topic, payload.topic_mark, payload.depth)
     intensity = payload.advice_intensity if payload.advice_intensity is not None else 3
+    provider, model, routed_deep = route_model(
+        payload.raw_text,
+        topic,
+        payload.topic_mark,
+        payload.depth,
+        advice_intensity=intensity,
+        contradiction_hint=contradiction_hint,
+    )
     system_prompt = compose_system_prompt(load_system_prompt_base(), contradiction_hint, intensity)
-    user_prompt = compose_user_prompt(topic, payload.raw_text, living_before, contradiction_hint)
+    user_prompt = compose_user_prompt(
+        topic, payload.raw_text, living_before, contradiction_hint, recent_entries
+    )
     model_payload, used_mock, model_provider_used, model_name_used, error_meta = call_model(
         provider,
         model,
@@ -636,6 +764,31 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
     )
 
     reply = str(model_payload.get("reply", "")).strip()
+
+    # 质量闸门：真模型回复若缺硬反对/disruptive/过短，补一轮短追问；仍缺则在 metadata 标 quality_gap
+    quality_meta: dict[str, Any] = {}
+    if not used_mock and reply:
+        gaps = assess_quality(reply)
+        if gaps:
+            fixed = quality_followup(
+                model_provider_used, model_name_used, system_prompt, user_prompt, reply, gaps
+            )
+            if fixed and str(fixed.get("reply", "")).strip():
+                model_payload = fixed
+                reply = str(fixed.get("reply", "")).strip()
+                remaining = assess_quality(reply)
+                quality_meta = {
+                    "quality_gate": "followup_applied",
+                    "initial_gaps": gaps,
+                    "remaining_gaps": remaining,
+                }
+                if remaining:
+                    quality_meta["quality_gap"] = remaining
+            else:
+                quality_meta = {"quality_gate": "followup_failed", "quality_gap": gaps}
+        else:
+            quality_meta = {"quality_gate": "passed"}
+
     living_update = str(model_payload.get("living_position_update", "")).strip()
     daily_snapshot = str(model_payload.get("daily_snapshot", "")).strip()
     reason_for_shift = str(model_payload.get("reason_for_shift", "")).strip()
@@ -668,6 +821,7 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
                 "model_used": f"{model_provider_used}:{model_name_used}",
                 "routing_mode": "deep" if routed_deep else "default",
                 **({"error": error_meta} if error_meta else {}),
+                **quality_meta,
             },
             "used_mock": used_mock,
         },
@@ -681,6 +835,8 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
     }
     if error_meta:
         response_metadata["error"] = error_meta
+    if quality_meta:
+        response_metadata.update(quality_meta)
 
     return EntryResponse(
         topic_slug=topic_slug,
