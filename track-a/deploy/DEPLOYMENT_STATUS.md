@@ -7,8 +7,8 @@
 | **Staging URL** | `https://keel-production-be1c.up.railway.app`（`/health`：[链接](https://keel-production-be1c.up.railway.app/health)） |
 | **Railway 项目** | keel-production（Moses 部署） |
 | **Root Directory** | `track-a` |
-| **最后 `/health` 检查** | **2026-07-11 09:55 JST** — **ok** HTTP **200**，`deepseek_configured` 待 redeploy 后确认 |
-| **最后 `/v1/entry` 检查** | **2026-07-11 09:55 JST** — 大脑已修（人格注入+显式降级）；**`used_mock: true`** 因 Railway `DEEPSEEK_API_KEY` **401 无效**，需在控制台换新 key |
+| **最后 `/health` 检查** | **2026-07-11 10:17 JST** — **ok** HTTP **200**，`deepseek_configured: true` |
+| **最后 `/v1/entry` 检查** | **2026-07-11 10:17 JST** — **`used_mock: false`**，`deepseek:deepseek-chat`，两条 tencent-ali-renewal 验收回复结构完整（主见/反对/下一步） |
 | **KEEL_STAGING_URL（GitHub Variable）** | **待填** → `https://keel-production-be1c.up.railway.app`（**无尾斜杠**） |
 | **备注** | 九叔 POST URL：[`../shortcuts/KEEL_URL.txt`](../shortcuts/KEEL_URL.txt)；变量：[`../server/RAILWAY_VARIABLES_傻瓜版.md`](../server/RAILWAY_VARIABLES_傻瓜版.md) |
 
@@ -32,4 +32,4 @@ curl -sS -X POST "https://keel-production-be1c.up.railway.app/v1/entry" \
   -d '{"topic_slug":"tencent-ali-renewal","raw_text":"smoke test","advice_intensity":3}'
 ```
 
-**Moses 必做**：DeepSeek 控制台换新 `DEEPSEEK_API_KEY` → Railway Variables 同步 → Redeploy → entry 应 `used_mock: false`。
+**下一步**：九叔 iPhone 装机（[`JIUSHU_5MIN.md`](../shortcuts/JIUSHU_5MIN.md)）。

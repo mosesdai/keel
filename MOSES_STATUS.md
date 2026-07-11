@@ -1,6 +1,6 @@
 # Moses 一页纸状态 · Keel / 军师
 
-> 更新：**2026-07-11 大脑已修**
+> 更新：**2026-07-11 大脑已接通 DeepSeek**
 
 ---
 
@@ -11,16 +11,16 @@
 
 ---
 
-## 2026-07-11 · 大脑已修
+## 2026-07-11 · 大脑已接通
 
 | 项 | 状态 |
 |----|------|
 | DeepSeek 调用链 | ✅ 端点/错误处理/显式 `used_mock` 标记 |
 | `prompts/system.txt` | ✅ 注入 PERSONALITY_CHARTER 核心人格 |
 | 矛盾检测 | ✅ 关键词辅助 + 模型对照立场书 |
-| Railway `POST /v1/entry` | ⚠️ 代码已 push；**`used_mock: true`** 因 `DEEPSEEK_API_KEY` **401 无效**——控制台换新 key 后 redeploy |
+| Railway `POST /v1/entry` | ✅ **`used_mock: false`**（2026-07-11 10:17 JST 双用例验收）；下一步九叔装机 |
 
-**Moses 必做（5 分钟）**： [DeepSeek 开放平台](https://platform.deepseek.com/) → 查余额 → 生成新 API Key → Railway Variables 更新 `DEEPSEEK_API_KEY` → Redeploy → curl entry 确认 `used_mock: false`。
+**Moses 下一步**：九叔 iPhone 按 [`track-a/shortcuts/JIUSHU_5MIN.md`](track-a/shortcuts/JIUSHU_5MIN.md) 装机。
 
 ---
 
