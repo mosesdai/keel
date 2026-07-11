@@ -207,8 +207,8 @@ def shared_entity(text_a: str, text_b: str) -> bool:
     return False
 
 
-def detect_contradiction(new_text: str, living_position: str) -> bool:
-    # 最小可用矛盾检测：同实体 + 情绪极性反转（支持<->反对）
+def detect_contradiction_hint(new_text: str, living_position: str) -> bool:
+    # 关键词辅助检测：同实体 + 情绪极性反转（支持<->反对）；最终张力由模型对照立场书判断
     if not living_position or living_position.strip() == "待主人首次输入后生长。":
         return False
 
@@ -281,20 +281,20 @@ INTENSITY_HINTS: dict[int, str] = {
 
 
 def compose_system_prompt(
-    charter_text: str, contradiction_detected: bool, advice_intensity: int = 3
+    charter_text: str, contradiction_hint: bool, advice_intensity: int = 3
 ) -> str:
-    extra_rule = (
-        "检测到新旧立场冲突时，不要做裁判，先解释为何发生转变、哪些证据变化、仍有哪些不确定性。"
-        if contradiction_detected
-        else "保持反昏君与 disruptive 创意常驻：既给稳妥方案，也给一个非线性备选。"
+    hint_rule = (
+        "关键词辅助检测到新旧立场可能有张力——请在 reason_for_shift 中认真解释转变或延续，"
+        "对照旧立场书逐点说明哪些假设变了、哪些证据变了、哪些只是情绪态。"
+        if contradiction_hint
+        else "请主动对照旧立场书与新输入，判断是延续还是转变，并在 reason_for_shift 中说明理由。"
     )
     intensity_rule = INTENSITY_HINTS.get(advice_intensity, INTENSITY_HINTS[3])
     return (
         f"{charter_text}\n\n"
-        "你现在运行在 Track A 过渡版，输出必须短、硬、有方向感，且不冒犯。\n"
         f"{intensity_rule}\n"
-        f"{extra_rule}\n"
-        "仅返回 JSON，不要多余文本。"
+        f"{hint_rule}\n"
+        "回复要有力度、不迎合；允许较长、结构化推演。仅返回 JSON，不要多余文本。"
     )
 
 
@@ -307,12 +307,12 @@ def require_api_key(x_api_key: Optional[str] = Header(default=None, alias="X-API
 
 
 def compose_user_prompt(
-    topic: dict[str, Any], raw_text: str, living_position: str, contradiction_detected: bool
+    topic: dict[str, Any], raw_text: str, living_position: str, contradiction_hint: bool
 ) -> str:
-    contradiction_note = (
-        "是。请在 reason_for_shift 字段解释为什么变化成立。"
-        if contradiction_detected
-        else "否。请在 reason_for_shift 字段写本次如何延续旧立场。"
+    hint_note = (
+        "关键词辅助：可能检测到立场张力（仅供参考，以你的对照分析为准）。"
+        if contradiction_hint
+        else "关键词辅助：未检测到明显极性反转（仍须你独立对照旧立场书判断）。"
     )
     return f"""
 当前主题：
@@ -325,30 +325,70 @@ def compose_user_prompt(
 新输入（已人工确认）：
 {raw_text}
 
-是否检测到与旧立场显著冲突：{contradiction_note}
+{hint_note}
+
+【镜子任务】把「当前立场书（旧）」和「新输入」一起读，判断是延续还是转变。
+在 reason_for_shift 中解释：哪些证据/假设变了？是情绪态反转还是理性修正？仍有哪些不确定性？
 
 请输出 JSON，字段必须完整：
 {{
-  "reply": "给主人的回复（80~220字，中文）",
-  "living_position_update": "更新后的当前立场书（Markdown，120~280字）",
-  "daily_snapshot": "今日快照追加片段（Markdown，80~180字）",
-  "reason_for_shift": "一句解释：为什么是延续/转变"
+  "reply": "给主人的结构化回复（Markdown，200~600字，含主见/反对意见/disruptive备选/下一步）",
+  "living_position_update": "更新后的当前立场书（Markdown，150~400字）",
+  "daily_snapshot": "今日快照追加片段（Markdown，100~250字）",
+  "reason_for_shift": "对照旧立场书解释：延续还是转变，为什么（80~200字）",
+  "tension_detected": true或false
 }}
 """
+
+
+class ModelCallError(Exception):
+    def __init__(
+        self,
+        message: str,
+        *,
+        provider: str,
+        status_code: Optional[int] = None,
+        error_code: Optional[str] = None,
+    ) -> None:
+        super().__init__(message)
+        self.message = message
+        self.provider = provider
+        self.status_code = status_code
+        self.error_code = error_code
+
+
+def parse_provider_error(response: httpx.Response, provider: str) -> ModelCallError:
+    status = response.status_code
+    body: dict[str, Any] = {}
+    try:
+        body = response.json()
+    except Exception:  # noqa: BLE001
+        body = {}
+
+    err = body.get("error", body)
+    message = str(err.get("message") or response.text[:240] or f"{provider} HTTP {status}")
+    error_code = err.get("code") or err.get("type")
+    return ModelCallError(
+        message,
+        provider=provider,
+        status_code=status,
+        error_code=str(error_code) if error_code else None,
+    )
 
 
 def deepseek_chat(messages: list[dict[str, str]], model: str) -> str:
     api_key = os.getenv("DEEPSEEK_API_KEY")
     if not api_key:
-        raise RuntimeError("DEEPSEEK_API_KEY 未配置")
+        raise ModelCallError("DEEPSEEK_API_KEY 未配置", provider="deepseek")
 
     payload = {"model": model, "messages": messages, "temperature": 0.6}
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
-    url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/v1/chat/completions")
+    url = os.getenv("DEEPSEEK_BASE_URL", "https://api.deepseek.com/chat/completions")
 
     with httpx.Client(timeout=40.0) as client:
         response = client.post(url, headers=headers, json=payload)
-        response.raise_for_status()
+        if response.status_code != 200:
+            raise parse_provider_error(response, "deepseek")
         data = response.json()
     return data["choices"][0]["message"]["content"]
 
@@ -356,7 +396,7 @@ def deepseek_chat(messages: list[dict[str, str]], model: str) -> str:
 def qwen_chat(messages: list[dict[str, str]], model: str) -> str:
     api_key = os.getenv("DASHSCOPE_API_KEY")
     if not api_key:
-        raise RuntimeError("DASHSCOPE_API_KEY 未配置")
+        raise ModelCallError("DASHSCOPE_API_KEY 未配置", provider="qwen")
 
     payload = {"model": model, "messages": messages, "temperature": 0.6}
     headers = {"Authorization": f"Bearer {api_key}", "Content-Type": "application/json"}
@@ -367,49 +407,55 @@ def qwen_chat(messages: list[dict[str, str]], model: str) -> str:
 
     with httpx.Client(timeout=40.0) as client:
         response = client.post(url, headers=headers, json=payload)
-        response.raise_for_status()
+        if response.status_code != 200:
+            raise parse_provider_error(response, "qwen")
         data = response.json()
     return data["choices"][0]["message"]["content"]
 
 
-def mock_output(raw_text: str, contradiction_detected: bool) -> dict[str, str]:
+def mock_output(raw_text: str, contradiction_hint: bool) -> dict[str, str]:
     head = raw_text.strip().replace("\n", " ")
     if len(head) > 80:
         head = head[:80] + "..."
 
-    if contradiction_detected:
+    if contradiction_hint:
         reply = (
-            "我先不裁决对错。你这次判断和旧立场出现了明显张力，"
-            "更像是证据结构变了而不是你“摇摆”。先把触发变化的三条证据列清，"
-            "再做续约立场分层：必须谈、可谈、坚决不谈。"
+            "⚠️ **本地兜底（非 DeepSeek）**\n\n"
+            "**主见**：我先不裁决对错——你这次判断和旧立场出现了张力。\n"
+            "**反对意见**：若把情绪反转当成证据更新，可能误判谈判窗口。\n"
+            "**disruptive备选**：先冻结立场 48 小时，用三条独立证据复核后再定档。\n"
+            "**下一步**：列出触发变化的三条证据，做续约分层（必须谈/可谈/坚决不谈）。"
         )
-        reason = "检测到张力，先解释转变，再推进下一步验证。"
+        reason = "关键词辅助检测到张力；本地兜底无法做真推演，待 DeepSeek 恢复后重跑。"
     else:
         reply = (
-            "我先接住你的核心判断："
-            f"{head}。下一步建议做两手：A 保守路径稳住底线；B disruptive 路径争取超预期。"
-            "我会继续盯反证，避免我们只看想看的证据。"
+            "⚠️ **本地兜底（非 DeepSeek）**\n\n"
+            f"**主见**：我先接住你的核心判断——{head}\n"
+            "**反对意见**：若只盯支持证据，可能错过替代合作窗口。\n"
+            "**disruptive备选**：并行试探第二谈判路径，不把筹码押在单一路径。\n"
+            "**下一步**：48 小时内补齐关键反证与价格区间证据。"
         )
-        reason = "本次延续旧立场，并补充反证与备选打法。"
+        reason = "本地兜底延续旧立场框架；待 DeepSeek 恢复后做真推演。"
 
     living_update = (
         "## 当前立场\n"
-        "- 主张：围绕腾讯阿里版权续约，优先把可验证条件讲清，再谈情绪判断。\n"
+        "- 主张：围绕当前主题，优先把可验证条件讲清，再谈情绪判断。\n"
         "- 本轮新增："
         + head
-        + "\n- 反对意见：若我们过度押注单一谈判路径，可能错失替代合作窗口。\n"
+        + "\n- 反对意见：若过度押注单一路径，可能错失替代窗口。\n"
         "- 下一步：48 小时内补齐关键反证与价格区间证据。"
     )
     daily_snapshot = (
         f"### {datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
         f"- 片段：{head}\n"
-        "- 军师动作：给出稳妥路径 + disruptive 备选，并提示最脆弱假设。"
+        "- 军师动作：本地兜底——给出稳妥路径 + disruptive 备选，并提示最脆弱假设。"
     )
     return {
         "reply": reply,
         "living_position_update": living_update,
         "daily_snapshot": daily_snapshot,
         "reason_for_shift": reason,
+        "tension_detected": contradiction_hint,
     }
 
 
@@ -419,12 +465,17 @@ def call_model(
     system_prompt: str,
     user_prompt: str,
     raw_text: str,
-    contradiction_detected: bool,
-) -> tuple[dict[str, Any], bool, str, str]:
+    contradiction_hint: bool,
+) -> tuple[dict[str, Any], bool, str, str, dict[str, Any]]:
     messages = [{"role": "system", "content": system_prompt}, {"role": "user", "content": user_prompt}]
+    error_meta: dict[str, Any] = {}
 
     if provider == "mock":
-        return mock_output(raw_text, contradiction_detected), True, "mock", model
+        error_meta = {
+            "fallback_reason": "no_provider_key",
+            "message": "未配置 DEEPSEEK_API_KEY 或 DASHSCOPE_API_KEY",
+        }
+        return mock_output(raw_text, contradiction_hint), True, "mock", model, error_meta
 
     try:
         if provider == "deepseek":
@@ -432,18 +483,51 @@ def call_model(
         elif provider == "qwen":
             content = qwen_chat(messages, model)
         else:
-            raise RuntimeError(f"未知 provider: {provider}")
+            raise ModelCallError(f"未知 provider: {provider}", provider=provider)
 
         parsed = extract_json_payload(content)
         if not parsed:
-            parsed = mock_output(raw_text, contradiction_detected)
-            parsed["reply"] = "模型输出格式异常，已自动降级：\n" + parsed["reply"]
-            return parsed, True, "mock", "mock-fallback"
-        return parsed, False, provider, model
+            error_meta = {
+                "fallback_reason": "invalid_json",
+                "message": "模型返回非 JSON，已降级",
+                "raw_preview": content[:300],
+            }
+            parsed = mock_output(raw_text, contradiction_hint)
+            parsed["reply"] = (
+                "⚠️ 模型输出格式异常，已降级为本地兜底（非真军师推理）：\n\n" + parsed["reply"]
+            )
+            return parsed, True, "mock", "mock-fallback", error_meta
+        return parsed, False, provider, model, error_meta
+    except ModelCallError as exc:
+        error_meta = {
+            "fallback_reason": "provider_error",
+            "provider": exc.provider,
+            "status_code": exc.status_code,
+            "error_code": exc.error_code,
+            "message": exc.message,
+        }
+        fallback = mock_output(raw_text, contradiction_hint)
+        status = exc.status_code or "n/a"
+        code = exc.error_code or "unknown"
+        fallback["reply"] = (
+            f"⚠️ {exc.provider} 调用失败（HTTP {status} / {code}）：{exc.message}\n"
+            "以下为本地兜底，**不是真军师推理**。请检查 API Key 与余额后重试。\n\n"
+            + fallback["reply"]
+        )
+        return fallback, True, "mock", "mock-fallback", error_meta
     except Exception as exc:  # noqa: BLE001
-        fallback = mock_output(raw_text, contradiction_detected)
-        fallback["reply"] = f"模型暂不可用，已使用本地兜底（{exc.__class__.__name__}）。\n{fallback['reply']}"
-        return fallback, True, "mock", "mock-fallback"
+        error_meta = {
+            "fallback_reason": "unexpected_error",
+            "message": str(exc),
+            "error_type": exc.__class__.__name__,
+        }
+        fallback = mock_output(raw_text, contradiction_hint)
+        fallback["reply"] = (
+            f"⚠️ 模型调用异常（{exc.__class__.__name__}）：{exc}\n"
+            "以下为本地兜底，**不是真军师推理**。\n\n"
+            + fallback["reply"]
+        )
+        return fallback, True, "mock", "mock-fallback", error_meta
 
 
 def append_entry(topic_slug: str, record: dict[str, Any]) -> None:
@@ -519,6 +603,8 @@ def health() -> dict[str, Any]:
         "data_dir": str(DATA_DIR),
         "seed_topics": [seed[0] for seed in TOPIC_SEEDS],
         "api_key_configured": bool(os.getenv("KEEL_API_KEY", "").strip()),
+        "deepseek_configured": bool(os.getenv("DEEPSEEK_API_KEY", "").strip()),
+        "qwen_configured": bool(os.getenv("DASHSCOPE_API_KEY", "").strip()),
     }
 
 
@@ -534,25 +620,26 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
 
     living_path = TOPICS_DIR / topic_slug / "living_position.md"
     living_before = living_path.read_text(encoding="utf-8")
-    contradiction = detect_contradiction(payload.raw_text, living_before)
+    contradiction_hint = detect_contradiction_hint(payload.raw_text, living_before)
 
     provider, model, routed_deep = route_model(payload.raw_text, topic, payload.topic_mark, payload.depth)
     intensity = payload.advice_intensity if payload.advice_intensity is not None else 3
-    system_prompt = compose_system_prompt(load_system_prompt_base(), contradiction, intensity)
-    user_prompt = compose_user_prompt(topic, payload.raw_text, living_before, contradiction)
-    model_payload, used_mock, model_provider_used, model_name_used = call_model(
+    system_prompt = compose_system_prompt(load_system_prompt_base(), contradiction_hint, intensity)
+    user_prompt = compose_user_prompt(topic, payload.raw_text, living_before, contradiction_hint)
+    model_payload, used_mock, model_provider_used, model_name_used, error_meta = call_model(
         provider,
         model,
         system_prompt,
         user_prompt,
         payload.raw_text,
-        contradiction,
+        contradiction_hint,
     )
 
     reply = str(model_payload.get("reply", "")).strip()
     living_update = str(model_payload.get("living_position_update", "")).strip()
     daily_snapshot = str(model_payload.get("daily_snapshot", "")).strip()
     reason_for_shift = str(model_payload.get("reason_for_shift", "")).strip()
+    tension_detected = bool(model_payload.get("tension_detected", contradiction_hint))
 
     if not reply:
         raise HTTPException(status_code=500, detail="模型返回为空")
@@ -570,7 +657,8 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
             "files": [item.model_dump() for item in payload.files] if payload.files else [],
             "reply": reply,
             "reason_for_shift": reason_for_shift,
-            "contradiction_detected": contradiction,
+            "contradiction_detected": tension_detected,
+            "contradiction_hint": contradiction_hint,
             "provider": model_provider_used,
             "model": model_name_used,
             "provider_routed": provider,
@@ -579,24 +667,30 @@ def post_entry(payload: EntryRequest, _: None = Depends(require_api_key)) -> Ent
             "metadata": {
                 "model_used": f"{model_provider_used}:{model_name_used}",
                 "routing_mode": "deep" if routed_deep else "default",
+                **({"error": error_meta} if error_meta else {}),
             },
             "used_mock": used_mock,
         },
     )
+
+    response_metadata: dict[str, Any] = {
+        "model_used": f"{model_provider_used}:{model_name_used}",
+        "model_routed": f"{provider}:{model}",
+        "routing_mode": "deep" if routed_deep else "default",
+        "contradiction_hint": contradiction_hint,
+    }
+    if error_meta:
+        response_metadata["error"] = error_meta
 
     return EntryResponse(
         topic_slug=topic_slug,
         reply=reply,
         living_position_summary=living_text[:400],
         daily_snapshot_snippet=snapshot_snippet[:320],
-        contradiction_detected=contradiction,
+        contradiction_detected=tension_detected,
         model_provider=model_provider_used,
         model_name=model_name_used,
-        metadata={
-            "model_used": f"{model_provider_used}:{model_name_used}",
-            "model_routed": f"{provider}:{model}",
-            "routing_mode": "deep" if routed_deep else "default",
-        },
+        metadata=response_metadata,
         used_mock=used_mock,
         timestamp=now,
     )

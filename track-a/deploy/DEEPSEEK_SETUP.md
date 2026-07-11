@@ -7,7 +7,11 @@
   - 用户消息包含 `/max`
   - entry 显式标记 `depth: deep`
   - topic 配置 `depth_mode=true`（或命中 `DEEP_TOPIC_SLUGS`）
-- 若 DeepSeek 不可用，服务会退到 Qwen 后备模型；再不可用则用本地 mock 兜底。
+- 若 DeepSeek 不可用，服务会退到 Qwen 后备模型；再不可用则用本地 mock 兜底，**明确标记 `used_mock: true` 并在 metadata.error 写明 HTTP 状态码**（不再静默假装军师）。
+
+## API 地址
+
+默认 `DEEPSEEK_BASE_URL=https://api.deepseek.com/chat/completions`（DeepSeek 官方 OpenAI 兼容端点）。
 
 ## 环境变量（推荐）
 
