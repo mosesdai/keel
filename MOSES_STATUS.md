@@ -1,6 +1,6 @@
 # Moses 一页纸状态 · Keel / 军师
 
-> 更新：**2026-07-11 大脑已接通 DeepSeek**
+> 更新：**2026-07-11 品质升级——输出打到最高（staging 已验收 used_mock:false）**
 
 ---
 
@@ -8,6 +8,23 @@
 
 **Cursor 对话在你关机后不能继续。** 本次 agent 任务是把成果 **落盘并 push 到 GitHub**。  
 你回来：开 Cursor 说 **「继续军师 app」**，或先读 **本文件** + [`SESSION_LOG.md`](./SESSION_LOG.md) 最新一轮。
+
+---
+
+## 2026-07-11 · 品质升级（打到最高）
+
+> 标准：Moses 自己用也要被输出不断积累、有启发、甚至害怕。详见 [`research/06-品质拉升记录.md`](./research/06-品质拉升记录.md)。
+
+| 项 | 状态 |
+|----|------|
+| 人格硬注入（`system.txt` 重写）| ✅ 反昏君配额+disruptive常驻+力谏五档+解释转变不裁决+禁鸡汤/空洞平衡/复读；固定硬核块【看见】【主见】【硬反对】【disruptive】【镜子/盲点】【下一步】 |
+| 生长逻辑（`app.py`）| ✅ 每轮喂近8条 entry+立场书；立场书改「演变体」（保留未决张力/军师留着的盲点/关键字）；去过短字数限 |
+| 模型路由 | ✅ 日常 chat；`/max`、intensity≥4、矛盾 → **reasoner** |
+| 质量闸门 | ✅ 缺硬反对/disruptive/过短 → 自动补一轮追问；仍缺标 `metadata.quality_gap` |
+| Staging 实测 3 条 | ✅ **`used_mock:false`**（含 1 条自动升 reasoner）；三条都命中「顶穿/害怕」标准；【看见】能跨轮串起 3 条输入 = 积累生效 |
+| ⚠️ 本地真模型 | 本地 `.env` DeepSeek key 已失效（401）→ 本地只出 mock；**需轮换本地 key** 才能本地复现 |
+
+**Moses 下一步**：① 轮换本地 DeepSeek key（本地测真模型）；② 连续多天真实输入让立场书/盲点长出个人化深度；③ 九叔 iPhone 按 [`track-a/shortcuts/JIUSHU_5MIN.md`](track-a/shortcuts/JIUSHU_5MIN.md) 装机。
 
 ---
 
