@@ -5,6 +5,21 @@
 
 ---
 
+## [2026-07-14] 第 9 轮 · 外部同事交接包
+
+- **本轮目标**：产出 `HANDOFF_README.md` + 更新根 `README.md` + 打 zip 给同事继续开发。
+- **本轮做了什么**：
+  - 新建 [`HANDOFF_README.md`](./HANDOFF_README.md)（中文主入口：状态快照、仓库地图、跑法、部署、门禁、索引）。
+  - 更新 [`README.md`](./README.md) 指向交接主文档；保留九叔 bootstrap 说明。
+  - 打包 `keel-handoff-20260714.zip`（排除 `.git`、`.env`、`.venv`、`__pycache__`、活数据密钥）。
+- **本轮结论**：GitHub `mosesdai/keel` 仍为持续开发源；zip 为 2026-07-14 快照，密钥须 Moses 单独交接。
+- **下次从这里继续**：
+  1. 同事：读 `HANDOFF_README.md` → 选项 A/B/C 择一开工。
+  2. P0 仍为九叔真机装机（`track-a/shortcuts/JIUSHU_5MIN.md`）。
+  3. 7/15 验收对照 `ACCEPTANCE.md` A0。
+
+---
+
 ## 模板（复制以新增一轮）
 
 ```
